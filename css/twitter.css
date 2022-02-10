@@ -1,0 +1,142 @@
+:root {
+  --l: 50%;
+  /*the initial lightness*/
+  --base-font-size: 16px;
+  --base-color: #210439;
+  --contrast-color: #9476AB;
+  --accent-color: #714C8F;
+  --color-primary-3: #381356;
+  --color-primary-4: #522B72;
+  --menu-background: rgba(32, 4, 55, 0.1);
+  --panel-background: rgba(114, 77, 145, 0.25);
+  --form-background-idle: rgba(112, 75, 141, 0.5);
+  --form-background-hover: rgba(112, 75, 141, 0.75);
+  --form-background-focus: rgba(112, 75, 141, 0.9);
+  --form-text-color-idle: #9476AB;
+  --form-text-color-hover: #f7f4f9;
+  --form-text-color-focus: white;
+}
+
+* {
+  border-color: var(--accent-color);
+  scrollbar-color: var(--contrast-color) var(--base-color);
+  scrollbar-width: thin;
+  scroll-snap-type: both mandatory;
+}
+* ::-webkit-scrollbar {
+  background-color: var(--base-color);
+  width: 6px;
+}
+* ::-webkit-scrollbar-button {
+  display: none;
+}
+* ::-webkit-scrollbar-track {
+  background-color: var(--base-color);
+}
+* ::-webkit-scrollbar-track-piece {
+  background-color: var(--base-color);
+}
+* ::-webkit-scrollbar-thumb {
+  background-color: var(--contrast-color);
+}
+* ::-webkit-scrollbar-corner {
+  background-color: var(--base-color);
+}
+* ::-webkit-resizer {
+  background-color: var(--base-color);
+}
+
+body {
+  font-family: Helvetica, Arial, serif;
+  overflow-x: hidden;
+  font-size: var(--base-font-size);
+  color: var(--contrast-color);
+}
+
+article, section, body, h1, h2, h3, h4, h5, h6, p, input, textarea, button, br, ul {
+  text-transform: lowercase;
+}
+
+.timeline-Widget {
+  max-width: unset;
+  background-color: unset;
+  border-radius: unset;
+  width: 100%;
+}
+.timeline-Widget .timeline-Body {
+  border-top: unset;
+  border-bottom: unset;
+}
+
+.timeline-TweetList-tweet {
+  border-top: unset;
+  margin-bottom: 5px;
+}
+.timeline-TweetList-tweet .timeline-Tweet {
+  color: var(--accent-color);
+  background-color: var(--panel-background);
+}
+.timeline-TweetList-tweet .timeline-Tweet:hover {
+  color: var(--accent-color);
+  background-color: var(--panel-background);
+}
+.timeline-TweetList-tweet .timeline-Tweet .timeline-Tweet-text {
+  font-size: 1.5rem;
+  white-space: unset;
+  line-height: 2.5rem;
+}
+.timeline-TweetList-tweet .timeline-Tweet a {
+  color: var(--accent-color);
+}
+.timeline-TweetList-tweet .timeline-Tweet a:hover {
+  color: var(--contrast-color);
+}
+
+.Icon {
+  filter: invert(35%) sepia(15%) saturate(1949%) hue-rotate(230deg) brightness(87%) contrast(84%);
+}
+.Icon:hover {
+  filter: invert(58%) sepia(9%) saturate(1568%) hue-rotate(231deg) brightness(85%) contrast(88%);
+}
+
+.timeline-Header-title,
+.timeline-Header-byline,
+.timeline-Tweet-retweetCredit,
+.Identity-screenName,
+.timeline-Tweet-timestamp {
+  color: var(--accent-color);
+}
+.timeline-Header-title:hover,
+.timeline-Header-byline:hover,
+.timeline-Tweet-retweetCredit:hover,
+.Identity-screenName:hover,
+.timeline-Tweet-timestamp:hover {
+  color: var(--contrast-color);
+}
+
+.timeline-LoadMore-prompt {
+  display: block;
+  width: 100%;
+  height: 60px;
+  font-size: 1.5rem;
+  margin: 10px 0;
+  outline: none;
+  border-radius: unset;
+  border: 0;
+  background-color: var(--form-background-idle);
+  color: var(--form-text-color-idle);
+}
+.timeline-LoadMore-prompt:hover {
+  background-color: var(--form-background-hover);
+  color: var(--form-text-color-hover);
+}
+.timeline-LoadMore-prompt:focus {
+  background-color: var(--form-background-focus);
+  color: var(--form-text-color-focus);
+}
+
+.timeline-Footer {
+  display: none;
+}
+
+/*# sourceMappingURL=twitter.css.map */

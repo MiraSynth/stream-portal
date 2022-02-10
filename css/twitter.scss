@@ -1,0 +1,102 @@
+@import "vars.style";
+@import "common";
+
+body {
+  font-family: Helvetica, Arial, serif;
+  overflow-x: hidden;
+  font-size: var(--base-font-size);
+  color: var(--contrast-color);
+}
+
+article, section, body, h1, h2, h3, h4, h5, h6, p, input, textarea, button, br, ul {
+  text-transform: lowercase;
+}
+
+.timeline-Widget {
+  max-width: unset;
+  background-color: unset;
+  border-radius: unset;
+  width: 100%;
+
+  .timeline-Body {
+    border-top: unset;
+    border-bottom: unset;
+  }
+}
+
+.timeline-TweetList-tweet {
+  border-top: unset;
+  margin-bottom: 5px;
+
+  .timeline-Tweet {
+    color: var(--accent-color);
+    background-color: var(--panel-background);
+
+    &:hover {
+      color: var(--accent-color);
+      background-color: var(--panel-background);
+    }
+
+    .timeline-Tweet-text {
+      font-size: 1.5rem;
+      white-space: unset;
+      line-height: 2.5rem;
+    }
+
+    a {
+      color: var(--accent-color);
+
+      &:hover {
+        color: var(--contrast-color);
+      }
+    }
+  }
+}
+
+// https://codepen.io/sosuke/pen/Pjoqqp
+.Icon {
+  filter: invert(35%) sepia(15%) saturate(1949%) hue-rotate(230deg) brightness(87%) contrast(84%);
+
+  &:hover {
+    filter: invert(58%) sepia(9%) saturate(1568%) hue-rotate(231deg) brightness(85%) contrast(88%);
+  }
+}
+
+.timeline-Header-title,
+.timeline-Header-byline,
+.timeline-Tweet-retweetCredit,
+.Identity-screenName,
+.timeline-Tweet-timestamp {
+  color: var(--accent-color);
+
+  &:hover {
+    color: var(--contrast-color);
+  }
+}
+
+.timeline-LoadMore-prompt {
+  display: block;
+  width: 100%;
+  height: 60px;
+  font-size: 1.5rem;
+  margin: 10px 0;
+  outline: none;
+  border-radius: unset;
+  border: 0;
+  background-color: var(--form-background-idle);
+  color: var(--form-text-color-idle);
+
+  &:hover {
+    background-color: var(--form-background-hover);
+    color: var(--form-text-color-hover);
+  }
+
+  &:focus {
+    background-color: var(--form-background-focus);
+    color: var(--form-text-color-focus);
+  }
+}
+
+.timeline-Footer {
+  display: none;
+}
