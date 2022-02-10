@@ -9,6 +9,7 @@ import { LoadPrivacyNotice } from "./privacy-notice.js"
 import { LoadAudioPlayer } from "./audio-player.js"
 import { LoadCanvasWrangler } from "./canvas-wrangler.js"
 import { LoadTwitter } from "./twitter.js"
+import { LoadAnimatedAssistant } from "./animated-assistant/animated-assistant.js"
 import { ROLL_RESULT_EVENT } from "./events/events.js";
 
 LoadRouter()
@@ -22,6 +23,7 @@ LoadPrivacyNotice();
 LoadAudioPlayer();
 LoadCanvasWrangler();
 LoadTwitter();
+LoadAnimatedAssistant();
 
 // const CONFIG = {
 //     apiReadiness: "http://localhost:3000/health/ready",
