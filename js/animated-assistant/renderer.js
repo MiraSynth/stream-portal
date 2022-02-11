@@ -22,19 +22,23 @@ export function LoadAnimatedAssistantRenderer() {
 
     const textureLoader = new THREE.TextureLoader();
 
-    const texWidth = 576;
-    const texHeight = 384;
     const size = 64;
-    const count = 3;
+    const xCount = 9;
+    const yCount = 12;
     const fps = 6;
+    const textureAtlas = {}
+    const textureAtlasAnimations = {
+        "idleL": ["00", "10", "20"],
+        "idleR": ["86", "76", "66"]
+    };
     let texture;
     /* sprites - start */
     textureLoader.load("assets/textures/sprites/enni.png", (t) => {
         texture = t;
         texture.minFilter = THREE.LinearFilter;
-        texture.repeat.x = 1 / 9;
-        texture.repeat.y = 1 / 6;
-        texture.offset.y = 5 * size / texHeight;
+        texture.repeat.x = 1 / xCount;
+        texture.repeat.y = 1 / yCount;
+        texture.offset.y = 3 * size / texture.image.height;
 
         const material = new THREE.SpriteMaterial({
             map: texture
@@ -42,6 +46,16 @@ export function LoadAnimatedAssistantRenderer() {
 
         const mWidth = material.map.image.width;
         const mHeight = material.map.image.height;
+
+        // calculate the sprite atlas
+        for (let y = 0; y < yCount; y++) {
+            for (let x = 0; x < xCount; x++) {
+                textureAtlas[`${x}${y}`] = {
+                    x: x * size / mWidth,
+                    y: Math.abs(y - (yCount-1)) * size / mHeight,
+                };
+            }
+        }
 
         const sprite = new THREE.Sprite(material);
         //sprite.center.set(1.0, 0.0);
@@ -54,13 +68,34 @@ export function LoadAnimatedAssistantRenderer() {
 
     });
 
+    let animationName = "idleR";
+    document.addEventListener("keydown", (event) => {
+        const keyCode = event.code;
+        if (keyCode === "KeyW") {
+            // up
+        } else if (keyCode === "KeyS") {
+            // down
+        } else if (keyCode === "KeyA") {
+            // left
+            animationName = "idleL";
+        } else if (keyCode === "KeyD") {
+            // right
+            animationName = "idleR";
+        }
+    }, false);
+
     async function animate() {
         requestAnimationFrame(animate);
 
         const t = clock.getElapsedTime();
 
         if ( texture ) {
-            texture.offset.x = Math.floor( ( t * fps ) % count ) * size / texWidth;
+            const animation = textureAtlasAnimations[animationName]
+            const i = Math.floor((t * fps) % animation.length);
+
+            const ta = textureAtlas[animation[i]];
+            texture.offset.x = ta.x;
+            texture.offset.y = ta.y;
         }
 
         renderer.render(scene, camera);
