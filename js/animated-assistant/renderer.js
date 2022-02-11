@@ -52,14 +52,14 @@ export function LoadAnimatedAssistantRenderer() {
             for (let x = 0; x < xCount; x++) {
                 textureAtlas[`${x}${y}`] = {
                     x: x * size / mWidth,
-                    y: Math.abs(y - (yCount-1)) * size / mHeight,
+                    y: (Math.abs(y - (yCount-1)) * size / mHeight) - 0.0002,
                 };
             }
         }
 
         const sprite = new THREE.Sprite(material);
         //sprite.center.set(1.0, 0.0);
-        sprite.scale.set(450, 450, 1);
+        sprite.scale.set(500, 500, 1);
         scene.add(sprite);
     });
     /* sprites - end */

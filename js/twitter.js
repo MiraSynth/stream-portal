@@ -5,7 +5,7 @@ a.contentDocument.body.querySelector(".timeline-TweetList")
 
 const template = `
 <!--<h2>Tweets</h2>-->
-<a class="twitter-timeline" data-lang="en" data-dnt="true" data-theme="dark" href="https://twitter.com/mirasynth?ref_src=twsrc%5Etfw"></a>
+<a class="twitter-timeline" data-lang="en" data-dnt="true" data-theme="dark" href="https://twitter.com/enniccino"></a>
 <!--<div class="twitter-embed">-->
 <!--    <ol>-->
 <!--        -->

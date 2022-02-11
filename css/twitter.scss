@@ -29,11 +29,11 @@ article, section, body, h1, h2, h3, h4, h5, h6, p, input, textarea, button, br, 
   margin-bottom: 5px;
 
   .timeline-Tweet {
-    color: var(--accent-color);
+    color: var(--contrast-color);
     background-color: var(--panel-background);
 
     &:hover {
-      color: var(--accent-color);
+      color: var(--contrast-color);
       background-color: var(--panel-background);
     }
 
@@ -44,7 +44,7 @@ article, section, body, h1, h2, h3, h4, h5, h6, p, input, textarea, button, br, 
     }
 
     a {
-      color: var(--accent-color);
+      color: var(--contrast-color);
 
       &:hover {
         color: var(--contrast-color);
@@ -67,7 +67,7 @@ article, section, body, h1, h2, h3, h4, h5, h6, p, input, textarea, button, br, 
 .timeline-Tweet-retweetCredit,
 .Identity-screenName,
 .timeline-Tweet-timestamp {
-  color: var(--accent-color);
+  color: var(--contrast-color);
 
   &:hover {
     color: var(--contrast-color);

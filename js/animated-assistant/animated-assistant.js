@@ -32,13 +32,22 @@ class AnimatedAssistant extends HTMLElement {
     }
 
     step() {
-        this._landingElements = document.body.querySelectorAll("[data-aa-landing]");
+        if (this._landingElements.length === 0) {
+            this._landingElements = document.body.querySelectorAll("[data-aa-landing]");
+
+            this._movingObject = this._landingElements[0];
+
+            for (const le of this._landingElements) {
+                le.addEventListener("mouseenter", () => {
+                    this._movingObject = le
+                });
+            }
+        }
+
         const len = this._landingElements.length;
         if (len > 0) {
-            const a = 0; //getRandomArbitrary(0, len);
-            this._movingObject = this._landingElements[a];
             const coords = this.getCoords(this._movingObject);
-            this.style.top = coords.top-100+"px";
+            this.style.top = coords.top-105+"px";
             this.style.left = coords.left+"px";
         }
 

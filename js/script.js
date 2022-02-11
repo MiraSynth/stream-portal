@@ -3,11 +3,9 @@ import { LoadMenu } from "./menu.js"
 import { LoadRandomText } from "./random-text.js"
 import { LoadContent } from "./content.js"
 import { LoadContact } from "./contact.js"
-import { LoadBackground } from "./background.js"
 import { LoadCommander } from "./commander.js"
 import { LoadPrivacyNotice } from "./privacy-notice.js"
 import { LoadAudioPlayer } from "./audio-player.js"
-import { LoadCanvasWrangler } from "./canvas-wrangler.js"
 import { LoadTwitter } from "./twitter.js"
 import { LoadAnimatedAssistant } from "./animated-assistant/animated-assistant.js"
 import { ROLL_RESULT_EVENT } from "./events/events.js";
@@ -17,11 +15,9 @@ LoadMenu()
 LoadRandomText();
 LoadContent();
 LoadContact();
-LoadBackground();
 LoadCommander();
 LoadPrivacyNotice();
 LoadAudioPlayer();
-LoadCanvasWrangler();
 LoadTwitter();
 LoadAnimatedAssistant();
 
@@ -115,7 +111,7 @@ document.addEventListener(ROUTER_CONTENT_LOADED_EVENT, e => {
 
 function loadTwitchEmbed() {
     new Twitch.Embed("twitch-embed", {
-        channel: "mirasynth",
+        channel: "enniccino",
         height: "max-content",
         theme: "dark",
         autoplay: true,
