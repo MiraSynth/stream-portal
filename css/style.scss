@@ -103,6 +103,8 @@ body {
   margin: 30px auto;
   padding: 0 30px;
   overflow: hidden;
+  pointer-events: none;
+  user-select: none;
 
   img {
     object-fit: contain;
