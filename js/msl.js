@@ -26,13 +26,13 @@ class MiraSynthLive extends HTMLElement {
             return;
         }
         
-        statusText.innerHTML = "Starting you login process, please wait...";
+        statusText.innerHTML = "Starting your login process, please wait...";
         setTimeout(async () => {
             try {
                 await this._redirectToTwitchLogin();
                 statusText.innerHTML = "Redirecting you to your Twitch login...";
             } catch (e) {
-                statusText.innerHTML = e.message;
+                statusText.innerHTML = `<p>Something went wrong, try again or send contact mother to get this fixed.</ br>Please quote the following:<p> </ br></ br><code>${e.message}</code>`;
             }
         }, 3000);
     }
