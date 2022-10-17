@@ -52,10 +52,15 @@ class Router extends HTMLElement {
 
         if (!CONTENT_STORE[pageId]) {
             const contentID = cleanUrl(this._basePath + pageId);
-            const url = cleanUrl(this._baseUrl + pageUri + ".html");
-            const response = await fetch(url);
+
+            let url = cleanUrl(this._baseUrl + pageUri + ".html");
+            let response = await fetch(url);
             if (response.status !== 200) {
-                alert("You are not authorized to view these memories, please contact the administrator.");
+                url = cleanUrl(this._baseUrl + pageUri + "/index.html");
+                response = await fetch(url);
+                if (response.status !== 200) {
+                    alert("You are not authorized to view these memories, please contact the administrator.");
+                }
             }
 
             const responseData = await response.text();

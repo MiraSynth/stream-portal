@@ -6,7 +6,8 @@
   "scripts": {
     "serve": "node ./tools/basic-server.js",
     "template-sync": "node ./tools/template-sync.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "sass": "sass css/style.scss css/style.css"
   },
   "keywords": [],
   "author": "",
@@ -14,7 +15,7 @@
   "dependencies": {
     "cors": "^2.8.5",
     "isomorphic-git": "^1.8.0",
-    "sharp": "^0.27.1",
+    "sharp": "^0.31.1",
     "three": "^0.125.2"
   },
   "devDependencies": {
