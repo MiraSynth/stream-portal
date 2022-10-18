@@ -35,6 +35,7 @@ class MiraSynthLive extends HTMLElement {
                     return;
                 }
             });
+            return;
         }
 
         statusText.innerHTML = "Starting your login process, please wait...";
