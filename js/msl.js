@@ -10,22 +10,33 @@ class MiraSynthLive extends HTMLElement {
         }
 
         const urlParams = new URLSearchParams(window.location.search);
-        const accessToken = urlParams.get('accessToken');
-        const refreshToken = urlParams.get('refreshToken');
-
-        if (accessToken && refreshToken) {
+        const code = urlParams.get('code');
+        if (code) {
             statusText.innerHTML = "Logging you in to MiraSynth Live...";
             setTimeout(async () => {
+                let tokenData;
                 try {
-                    await this._sendToApplication(accessToken, refreshToken);
-                    statusText.innerHTML = "You have been logged into MiraSynth Live, you can close this window now...";
+                    statusText.innerHTML = "Fetching login from twitch...";
+                    tokenData = await this._getAuthorizationToken(code);
                 } catch (e) {
-                    statusText.innerHTML = e.message;
+                    statusText.innerHTML = `<p>Something went wrong, try again or send contact mother to get this fixed.</ br>Please quote the following:<p> </ br></ br><code>${e.message}</code>`;
                 }
-            }, 3000);
-            return;
+
+                if (tokenData.accessToken && tokenData.refreshToken) {
+                    statusText.innerHTML = "Authorizing your information...";
+                    setTimeout(async () => {
+                        try {
+                            await this._sendToApplication(accessToken, refreshToken);
+                            statusText.innerHTML = "You have been logged into MiraSynth Live, you can close this window now...";
+                        } catch (e) {
+                            statusText.innerHTML = e.message;
+                        }
+                    }, 3000);
+                    return;
+                }
+            });
         }
-        
+
         statusText.innerHTML = "Starting your login process, please wait...";
         setTimeout(async () => {
             try {
@@ -35,6 +46,16 @@ class MiraSynthLive extends HTMLElement {
                 statusText.innerHTML = `<p>Something went wrong, try again or send contact mother to get this fixed.</ br>Please quote the following:<p> </ br></ br><code>${e.message}</code>`;
             }
         }, 3000);
+    }
+
+    async _getAuthorizationToken(code) {
+        const response = await fetch(`https://msl.mirasynth.stream/api/twitch/authorize?code=${code}`);
+        if (response.status !== 200) {
+            throw Error("Unable to get information from mother");
+        }
+
+        const data = await response.json();
+        return data;
     }
 
     async _sendToApplication(accessToken, refreshToken) {
