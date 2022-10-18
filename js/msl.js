@@ -29,11 +29,14 @@ class MiraSynthLive extends HTMLElement {
             }
 
             if (tokenData.accessToken && tokenData.refreshToken) {
-                this._statusText.innerHTML = "Authorizing your information...";
-                await timeout(3000);
                 try {
+                    const userInfo = await this._getUserInfo(tokenData.accessToken);
+
+                    this._statusText.innerHTML = `Welcome ${userInfo.displayName}, we are now authorizing your information...`;
+                    await timeout(3000);
+                
                     await this._sendToApplication(tokenData.accessToken, tokenData.refreshToken);
-                    this._statusText.innerHTML = "You have been logged into MiraSynth Live, you can close this window now...";
+                    this._statusText.innerHTML = `You have been logged in ${userInfo.displayName}, you can close this window now...`;
                 } catch (e) {
                     this._statusText.innerHTML = e.message;
                 }
@@ -55,6 +58,16 @@ class MiraSynthLive extends HTMLElement {
         const response = await fetch(`https://msl.mirasynth.stream/api/twitch/authorize?code=${code}`);
         if (response.status !== 200) {
             throw Error("Unable to get information from mother");
+        }
+
+        const data = await response.json();
+        return data;
+    }
+
+    async _getUserInfo(token) {
+        const response = await fetch(`https://msl.mirasynth.stream/api/twitch/userinfo?token=${token}`);
+        if (response.status !== 200) {
+            throw Error("Unable to get user information from the mothership");
         }
 
         const data = await response.json();
