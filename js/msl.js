@@ -3,50 +3,48 @@ class MiraSynthLive extends HTMLElement {
     constructor() {
         super();
 
-        const statusText = this.querySelector("#status-text");
+        this._statusText = this.querySelector("#status-text");
 
-        if (!statusText) {
+        if (!this._statusText) {
             return;
         }
+    }
 
+    async _startProcess () {
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
         if (code) {
-            statusText.innerHTML = "Logging you in to MiraSynth Live...";
-            setTimeout(async () => {
-                let tokenData;
-                try {
-                    statusText.innerHTML = "Fetching login from twitch...";
-                    tokenData = await this._getAuthorizationToken(code);
-                } catch (e) {
-                    statusText.innerHTML = `<p>Something went wrong, try again or send contact mother to get this fixed.</ br>Please quote the following:<p> </ br></ br><code>${e.message}</code>`;
-                }
+            this._statusText.innerHTML = "Logging you in to MiraSynth Live...";
+            let tokenData;
+            try {
+                this._statusText.innerHTML = "Fetching login from twitch...";
+                tokenData = await this._getAuthorizationToken(code);
+            } catch (e) {
+                this._statusText.innerHTML = `<p>Something went wrong, try again or send contact mother to get this fixed.</ br>Please quote the following:<p> </ br></ br><code>${e.message}</code>`;
+            }
 
-                if (tokenData.accessToken && tokenData.refreshToken) {
-                    statusText.innerHTML = "Authorizing your information...";
-                    setTimeout(async () => {
-                        try {
-                            await this._sendToApplication(accessToken, refreshToken);
-                            statusText.innerHTML = "You have been logged into MiraSynth Live, you can close this window now...";
-                        } catch (e) {
-                            statusText.innerHTML = e.message;
-                        }
-                    }, 3000);
-                    return;
+            if (tokenData.accessToken && tokenData.refreshToken) {
+                this._statusText.innerHTML = "Authorizing your information...";
+                await timeout(3000);
+                try {
+                    await this._sendToApplication(accessToken, refreshToken);
+                    this._statusText.innerHTML = "You have been logged into MiraSynth Live, you can close this window now...";
+                } catch (e) {
+                    this._statusText.innerHTML = e.message;
                 }
-            });
+                return;
+            }
             return;
         }
 
-        statusText.innerHTML = "Starting your login process, please wait...";
-        setTimeout(async () => {
-            try {
-                await this._redirectToTwitchLogin();
-                statusText.innerHTML = "Redirecting you to your Twitch login...";
-            } catch (e) {
-                statusText.innerHTML = `<p>Something went wrong, try again or send contact mother to get this fixed.</ br>Please quote the following:<p> </ br></ br><code>${e.message}</code>`;
-            }
-        }, 3000);
+        this._statusText.innerHTML = "Starting your login process, please wait...";
+        await timeout(3000);
+        try {
+            await this._redirectToTwitchLogin();
+            this._statusText.innerHTML = "Redirecting you to your Twitch login...";
+        } catch (e) {
+            this._statusText.innerHTML = `<p>Something went wrong, try again or send contact mother to get this fixed.</ br>Please quote the following:<p> </ br></ br><code>${e.message}</code>`;
+        }
     }
 
     async _getAuthorizationToken(code) {
@@ -86,6 +84,10 @@ class MiraSynthLive extends HTMLElement {
             document.location.href = data.redirectTarget;
         }, 1000);
     }
+}
+
+function timeout(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export function LoadMSL() {
