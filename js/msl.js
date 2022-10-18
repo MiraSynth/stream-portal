@@ -25,6 +25,7 @@ class MiraSynthLive extends HTMLElement {
                 tokenData = await this._getAuthorizationToken(code);
             } catch (e) {
                 this._statusText.innerHTML = `<p>Something went wrong, try again or send contact mother to get this fixed.</ br>Please quote the following:<p> </ br></ br><code>${e.message}</code>`;
+                return;
             }
 
             if (tokenData.accessToken && tokenData.refreshToken) {
@@ -36,7 +37,6 @@ class MiraSynthLive extends HTMLElement {
                 } catch (e) {
                     this._statusText.innerHTML = e.message;
                 }
-                return;
             }
             return;
         }
