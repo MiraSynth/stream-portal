@@ -8,6 +8,10 @@ class MiraSynthLive extends HTMLElement {
         if (!this._statusText) {
             return;
         }
+
+        setTimeout(async () => {
+            await _startProcess();
+        });
     }
 
     async _startProcess () {
