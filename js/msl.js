@@ -32,7 +32,7 @@ class MiraSynthLive extends HTMLElement {
                 this._statusText.innerHTML = "Authorizing your information...";
                 await timeout(3000);
                 try {
-                    await this._sendToApplication(accessToken, refreshToken);
+                    await this._sendToApplication(tokenData.accessToken, tokenData.refreshToken);
                     this._statusText.innerHTML = "You have been logged into MiraSynth Live, you can close this window now...";
                 } catch (e) {
                     this._statusText.innerHTML = e.message;
