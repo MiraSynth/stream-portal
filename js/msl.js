@@ -10,7 +10,7 @@ class MiraSynthLive extends HTMLElement {
         }
 
         setTimeout(async () => {
-            await _startProcess();
+            await this._startProcess();
         });
     }
 
