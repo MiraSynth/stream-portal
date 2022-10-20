@@ -1,0 +1,54 @@
+<!DOCTYPE html><!--suppress HtmlUnknownTarget --><html lang="en" xmlns="http://www.w3.org/1999/html"><head>
+    <meta charset="UTF-8">
+    <base href="https://mirasynth.stream/" target="_blank">
+    <title>Little bite or a big bite?</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+</head>
+
+<body>
+
+<div class="main-content">
+    <nav class="main-menu">
+        <a class="item" href="/" data-menu="home">Home</a>
+        <a class="item" href="/mirasynthlive" data-menu="mirasynthlive">MiraSynth Live</a>
+    </nav>
+
+    <simple-router>
+        <section class="document-section">
+            <h1>MiraSynth Live</h1>
+            <h2>Setup and control your application from here!</h2>
+            <mira-synth-live-app class="s">
+                <p>
+                    <span id="status-text">Loading...</span>
+                </p>
+
+                <msl-redeem-selector>
+                    <form>
+                        <label for="tts-redeem-name">Choose your redeem</label>
+                        <input id="tts-redeem-name" value="" placeholder="Your TTS redeem name" />
+                    </form>
+                    <div class="tts-redeems"></div>
+                </msl-redeem-selector>
+            </mira-synth-live-app>
+        </section>
+    </simple-router>
+
+    <footer>
+        <console-commander></console-commander>
+    </footer>
+</div>
+
+<privacy-notice></privacy-notice>
+
+<div class="loader-blinds"></div>
+<script type="module" src="js/script.js"></script>
+<script async="" src="https://embed.twitch.tv/embed/v1.js"></script>
+
+<template id="msl-twitch-redeem-template">
+    <div class="msl-twitch-redeem">
+        <div class="msl-twitch-redeem-button"></div>
+        <span class="msl-twitch-redeem-title"></span>
+    </div>
+</template>
+
+</body></html>

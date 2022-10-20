@@ -10,6 +10,7 @@ import { LoadAudioPlayer } from "./audio-player.js"
 import { LoadCanvasWrangler } from "./canvas-wrangler.js"
 import { LoadTwitter } from "./twitter.js"
 import { LoadMSL } from "./msl.js"
+import { LoadMSLApp } from "./mslapp.js"
 import { ROLL_RESULT_EVENT } from "./events/events.js";
 
 LoadRouter()
@@ -24,6 +25,7 @@ LoadAudioPlayer();
 LoadCanvasWrangler();
 LoadTwitter();
 LoadMSL();
+LoadMSLApp();
 
 // const CONFIG = {
 //     apiReadiness: "http://localhost:3000/health/ready",

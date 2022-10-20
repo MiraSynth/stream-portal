@@ -1,0 +1,38 @@
+msl-redeem-selector {
+    display: block;
+    padding-bottom: 1rem;
+    padding: 30px;
+
+    form {
+       padding: 0; 
+    }
+
+    .tts-redeems {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    msl-redeem-item {
+        display: block;
+        width: 120px;
+        margin: 5px;
+
+        .msl-twitch-redeem-button {
+            width: 120px;
+            height: 120px;
+            background-color: black;
+            opacity: 0.6;
+            cursor: pointer;
+
+            &:hover {
+                opacity: 0.8;
+            }
+        }
+
+        .msl-twitch-redeem-title {
+            display: block;
+            text-align: center;
+            padding: 2px 3px 0 3px;
+        }
+    }
+}
