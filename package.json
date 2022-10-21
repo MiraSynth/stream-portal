@@ -7,7 +7,8 @@
     "serve": "node ./tools/basic-server.js",
     "template-sync": "node ./tools/template-sync.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "sass": "sass css/style.scss css/style.css"
+    "sass": "sass css/style.scss css/style.css",
+    "watch": "npm-watch"
   },
   "keywords": [],
   "author": "",
@@ -23,6 +24,10 @@
     "express": "^4.17.1",
     "http-server": "^14.0.0",
     "jsdom": "^16.4.0",
+    "npm-watch": "^0.11.0",
     "sass": "^1.32.2"
+  },
+  "watch": {
+    "sass": "./css/*.scss"
   }
 }

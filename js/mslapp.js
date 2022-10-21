@@ -1,3 +1,7 @@
+import { delay } from "./utils.js"
+
+const AppReadyEvent = "MiraSynthLiveApp.AppReady";
+const AppWaitingEvent = "MiraSynthLiveApp.AppWaiting";
 const TokenReceivedEvent = "MiraSynthLiveApp.tokenRecieved";
 const RedeemSelectedEvent = "MSLRedeemItem.redeemSelectedEvent";
 
@@ -8,22 +12,132 @@ class MiraSynthLiveApp extends HTMLElement {
     constructor() {
         super();
 
-        setTimeout(async () => {
-            var token = await this._getToken();
-            this._token = token;
+        window.addEventListener(AppReadyEvent, async () => {
+            await this._init();
+            this._hideLoader();
+            this._showApp();
+        });
 
-            window.dispatchEvent(new CustomEvent(TokenReceivedEvent, {}));
+        window.addEventListener(AppWaitingEvent, async () => {
+            this._hideApp();
+            this._showLoader();
+        });
+
+        setTimeout(async () => {
+            await this._healthCheckLoop();
+        });
+
+        setTimeout(async () => {
+            await this._init();
         });
     }
 
+    async _init() {
+        var token = await this._getToken();
+        this._token = token;
+
+        window.dispatchEvent(new CustomEvent(TokenReceivedEvent, {}));
+    }
+
+    async _healthCheckLoop() {
+        let isLive = false;
+        let isReady = false;
+
+        while (true) {
+            while (true) {
+                isLive = await this._getLive()
+                if (isLive) {
+                    break;
+                }
+                await delay(1000);
+            }
+
+            while (true) {
+                isReady = await this._getReady()
+                if (isReady) {
+                    break;
+                }
+                await delay(1000);
+            }
+            
+            window.dispatchEvent(new CustomEvent(AppReadyEvent, {}));
+
+            while (true) {
+                isLive = await this._getLive()
+                if (!isLive) {
+                    break;
+                }
+                await delay(5000);
+            }
+
+            window.dispatchEvent(new CustomEvent(AppWaitingEvent, {}));
+        }
+    }
+
+    async _getLive() {
+        try {
+            const response = await fetch(`http://localhost:8085/api/health/live`);
+            if (response.status !== 200) {
+                return false;
+            }
+
+            const data = await response.json();
+            return data;
+        } catch {
+            return false;
+        }
+    }
+
+    async _getReady() {
+        try {
+            const response = await fetch(`http://localhost:8085/api/health/ready`);
+            if (response.status !== 200) {
+                return false;
+            }
+
+            const data = await response.json();
+            return data;
+        } catch {
+            return false;
+        }
+    }
+
     async _getToken() {
-        const response = await fetch(`http://localhost:8085/api/config/read?path=Twitch.Token.AccessToken`);
+        const response = await fetch(`http://localhost:8085/api/config?path=Twitch.Token.AccessToken`);
         if (response.status !== 200) {
             throw Error("Unable to get token from app");
         }
 
         const data = await response.json();
         return data;
+    }
+
+    _showApp() {
+        const contents = this.querySelectorAll(".content");
+        contents.forEach(x => {
+            x.style.display = "block";
+        });
+    }
+
+    _hideApp() {
+        const contents = this.querySelectorAll(".content");
+        contents.forEach(x => {
+            x.style.display = "none";
+        });
+    }
+
+    _showLoader() {
+        const contents = this.querySelectorAll(".loader");
+        contents.forEach(x => {
+            x.style.display = "block";
+        });
+    }
+
+    _hideLoader() {
+        const contents = this.querySelectorAll(".loader");
+        contents.forEach(x => {
+            x.style.display = "none";
+        });
     }
 
     get token() {
@@ -79,6 +193,7 @@ class MSLRedeemSelector extends HTMLElement {
 
     _renderRedeems() {
         const redeemsContainer = this.querySelector(".tts-redeems");
+        redeemsContainer.innerHTML = "";
         for (const [, redeem] of Object.entries(this._redeems)) {
             const item = new MSLRedeemItem(redeem);
             redeemsContainer.appendChild(item);
@@ -102,6 +217,8 @@ class MSLRedeemItem extends HTMLElement {
 
         this.querySelector(".msl-twitch-redeem-title").innerHTML = this._redeem.title;
 
+        this.querySelector("img").src = this._redeem.image ? this._redeem.image.url_2x : this._redeem.defaultImage.urlX2;
+
         const button = this.querySelector(".msl-twitch-redeem-button");
         button.addEventListener("click", () => this._onClick());
         button.style.backgroundColor = this._redeem.backgroundColor;
@@ -122,7 +239,7 @@ function getToken(element) {
 }
 
 async function getConfig(path) {
-    const response = await fetch(`http://localhost:8085/api/config/read?path=${path}`);
+    const response = await fetch(`http://localhost:8085/api/config?path=${path}`);
     if (response.status !== 200) {
         throw Error("Unable to get config from the mothership");
     }

@@ -1,3 +1,5 @@
+import { delay } from "./utils.js"
+
 class MiraSynthLive extends HTMLElement {
 
     constructor() {
@@ -33,7 +35,7 @@ class MiraSynthLive extends HTMLElement {
                     const userInfo = await this._getUserInfo(tokenData.accessToken);
 
                     this._statusText.innerHTML = `Welcome ${userInfo.displayName}, we are now authorizing your information...`;
-                    await timeout(3000);
+                    await delay(3000);
                 
                     await this._sendToApplication(tokenData.accessToken, tokenData.refreshToken);
                     this._statusText.innerHTML = `You have been logged in ${userInfo.displayName}, you can close this window now...`;
@@ -45,7 +47,7 @@ class MiraSynthLive extends HTMLElement {
         }
 
         this._statusText.innerHTML = "Starting your login process, please wait...";
-        await timeout(3000);
+        await delay(3000);
         try {
             await this._redirectToTwitchLogin();
             this._statusText.innerHTML = "Redirecting you to your Twitch login...";
@@ -101,10 +103,6 @@ class MiraSynthLive extends HTMLElement {
             document.location.href = data.redirectTarget;
         }, 1000);
     }
-}
-
-function timeout(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export function LoadMSL() {

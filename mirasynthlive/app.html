@@ -17,18 +17,19 @@
         <section class="document-section">
             <h1>MiraSynth Live</h1>
             <h2>Setup and control your application from here!</h2>
-            <mira-synth-live-app class="s">
-                <p>
-                    <span id="status-text">Loading...</span>
-                </p>
-
-                <msl-redeem-selector>
-                    <form>
-                        <label for="tts-redeem-name">Choose your redeem</label>
-                        <input id="tts-redeem-name" value="" placeholder="Your TTS redeem name" />
-                    </form>
-                    <div class="tts-redeems"></div>
-                </msl-redeem-selector>
+            <mira-synth-live-app>
+                <div class="loader">
+                    <p>Loading...</p>
+                </div>
+                <div class="content">
+                    <msl-redeem-selector>
+                        <form>
+                            <label for="tts-redeem-name">Choose your text to speech redeem</label>
+                            <input id="tts-redeem-name" value="" placeholder="Your TTS redeem name" />
+                        </form>
+                        <div class="tts-redeems"></div>
+                    </msl-redeem-selector>
+                </div>
             </mira-synth-live-app>
         </section>
     </simple-router>
@@ -46,7 +47,9 @@
 
 <template id="msl-twitch-redeem-template">
     <div class="msl-twitch-redeem">
-        <div class="msl-twitch-redeem-button"></div>
+        <div class="msl-twitch-redeem-button">
+            <img src="">
+        </div>
         <span class="msl-twitch-redeem-title"></span>
     </div>
 </template>
