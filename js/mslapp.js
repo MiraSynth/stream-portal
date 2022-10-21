@@ -147,6 +147,7 @@ class MiraSynthLiveApp extends HTMLElement {
 
 class MSLRedeemSelector extends HTMLElement {
 
+    _selectedRedeemId = "";
     _redeems = {}
     _redeemInput;
 
@@ -166,17 +167,26 @@ class MSLRedeemSelector extends HTMLElement {
         }
 
         window.addEventListener(RedeemSelectedEvent, async e => {
-            var redeemId = e.detail.redeemId;
-            await setConfig("TTSChatBubble.SpeakRewardId", redeemId);
-            this._redeemInput.value = this._redeems[redeemId].title;
+            this._selectedRedeemId = e.detail.redeemId;
+            this._redeemInput.value = this._redeems[this._selectedRedeemId].title;
+
+            this.querySelectorAll("msl-redeem-item").forEach(x => {
+                if (x.redeemId === this._selectedRedeemId) {
+                    return;
+                }
+
+                x.unselect();
+            });
+
+            await setConfig("TTSChatBubble.SpeakRewardId", this._selectedRedeemId);
         });
     }
 
     async _init() {
         this._redeems = await this._getRedeems();
 
-        var redeemId = await getConfig("TTSChatBubble.SpeakRewardId");
-        this._redeemInput.value = this._redeems[redeemId].title;
+        this._selectedRedeemId = await getConfig("TTSChatBubble.SpeakRewardId");
+        this._redeemInput.value = this._redeems[this._selectedRedeemId].title;
 
         this._renderRedeems();
     }
@@ -195,7 +205,7 @@ class MSLRedeemSelector extends HTMLElement {
         const redeemsContainer = this.querySelector(".tts-redeems");
         redeemsContainer.innerHTML = "";
         for (const [, redeem] of Object.entries(this._redeems)) {
-            const item = new MSLRedeemItem(redeem);
+            const item = new MSLRedeemItem(redeem, redeem.id === this._selectedRedeemId);
             redeemsContainer.appendChild(item);
         }
     }
@@ -208,7 +218,7 @@ class MSLRedeemSelector extends HTMLElement {
 class MSLRedeemItem extends HTMLElement {
     _redeem = null;
 
-    constructor(redeem) {
+    constructor(redeem, selected) {
         super();
 
         this.innerHTML = document.querySelector("template#msl-twitch-redeem-template").innerHTML;
@@ -219,17 +229,34 @@ class MSLRedeemItem extends HTMLElement {
 
         this.querySelector("img").src = this._redeem.image ? this._redeem.image.url_2x : this._redeem.defaultImage.urlX2;
 
+        if (selected) {
+            this.select();
+        }
+
         const button = this.querySelector(".msl-twitch-redeem-button");
         button.addEventListener("click", () => this._onClick());
         button.style.backgroundColor = this._redeem.backgroundColor;
     }
 
     _onClick() {
+        this.classList.add("selected");
         window.dispatchEvent(new CustomEvent(RedeemSelectedEvent, {
             detail: {
                 redeemId: this._redeem.id
             }
         }));
+    }
+
+    get redeemId() {
+        return this._redeem ? this._redeem.id : null;
+    }
+
+    unselect() {
+        this.classList.remove("selected");
+    }
+
+    select() {
+        this.classList.add("selected");
     }
 }
 
@@ -254,7 +281,7 @@ async function setConfig(path, value) {
         value: value
     };
 
-    const response = await fetch('http://localhost:8085/api/config/write', {
+    const response = await fetch('http://localhost:8085/api/config', {
         method: 'post',
         body: JSON.stringify(body),
         headers: {'Content-Type': 'application/json'}

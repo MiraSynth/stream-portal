@@ -33,12 +33,27 @@ mira-synth-live-app {
         msl-redeem-item {
             display: block;
             width: 120px;
+            height: 200px;
             margin: 5px;
+
+            &.selected {
+                .msl-twitch-redeem-button {
+                    border: 4px solid var(--accent-color);
+                    width: 112px;
+                    height: 112px;
+                    opacity: 1;
+                }
+
+                .msl-twitch-redeem-title {
+                    font-weight: 600;
+                }
+            }
 
             .msl-twitch-redeem-button {
                 display: flex;
                 width: 120px;
                 height: 120px;
+                margin: auto;
                 background-color: black;
                 opacity: 0.6;
                 cursor: pointer;
