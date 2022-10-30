@@ -36,9 +36,10 @@ class MSLSpeechCommunicationService {
 
         this._ws = new WebSocket('ws://localhost:4649/speak');
 
+        let timedOut = false;
         let connectionTimeout = setTimeout(() => {
-            this._connected = false;
-            reject("Connection timed out");
+            timedOut = true;
+            this._ws.close();
         }, 15000);
     
         this._ws.onclose = () => {
@@ -49,7 +50,7 @@ class MSLSpeechCommunicationService {
             this._connected = false;
             console.log("WSS Disconnected");
 
-            if (resolve) {
+            if (resolve && !timedOut) {
                 resolve();
             }
         };
@@ -66,6 +67,12 @@ class MSLSpeechCommunicationService {
                 capabilities: ["tts"]
             };
             this._ws.send(JSON.stringify(readyMessage));
+        };
+
+        this._ws.onerror = (e) => {
+            if (reject) {
+                reject(e);
+            }
         };
 
         this._ws.onmessage = (webSocketMessage) => {
