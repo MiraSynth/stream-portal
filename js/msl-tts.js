@@ -16,7 +16,11 @@ class MSLSpeechCommunicationService {
                 return;
             }
             console.log("WSS Attempting to connect");
-            await this._connect();
+            try {
+                await this._connect();
+            } catch (e) {
+                console.error("WSS Error", e);
+            }
         }, 5000);
     }
 
@@ -34,7 +38,7 @@ class MSLSpeechCommunicationService {
 
         let connectionTimeout = setTimeout(() => {
             this._connected = false;
-            reject();
+            reject("Connection timed out");
         }, 15000);
     
         this._ws.onclose = () => {
