@@ -4,63 +4,89 @@ class MSLSpeechCommunicationService {
     _socket;
     _ws;
     _clients = new Map();
-    _voices = voices;
+    _voices = [];
     _selectedVoiceIndex = 0;
+
+    _connected = false;
 
     constructor(voices) {
         this._voices = voices;
-        setTimeout(async () => {
+        setInterval(async () => {
+            if (this._connected) {
+                return;
+            }
+            console.log("WSS Attempting to connect");
             await this._connect();
-        }, 1);
+        }, 5000);
     }
 
-    async _connect() {
-        async function connectToServer() {
-            const ws = new WebSocket('ws://localhost:4649/speak');
-            ws.onclose = () => {
-        
+    _connect() {
+        this._connected = true;
+
+        let resolve;
+        let reject;
+        const promise = new Promise((res, rej) => {
+            resolve = res;
+            reject = rej;
+        });
+
+        this._ws = new WebSocket('ws://localhost:4649/speak');
+
+        let connectionTimeout = setTimeout(() => {
+            this._connected = false;
+            reject();
+        }, 15000);
+    
+        this._ws.onclose = () => {
+            if (connectionTimeout) {
+                clearTimeout(connectionTimeout);
+                connectionTimeout = null;
+            }
+            this._connected = false;
+            console.log("WSS Disconnected");
+
+            if (resolve) {
+                resolve();
+            }
+        };
+    
+        this._ws.onopen = () => {
+            if (connectionTimeout) {
+                clearTimeout(connectionTimeout);
+                connectionTimeout = null;
+            }
+            console.log("WSS Connected");
+
+            const readyMessage = {
+                type: "TTSCapabilitiesSocketMessage",
+                capabilities: ["tts"]
             };
-            return new Promise((resolve) => {
-                const timer = setInterval(() => {
-                    if(ws.readyState === 1) {
-                        clearInterval(timer)
-        
-                        const readyMessage = {
-                            type: "TTSCapabilitiesSocketMessage",
-                            capabilities: ["tts"]
-                        };
-                        ws.send(JSON.stringify(readyMessage));
-        
-                        resolve(ws);
-                    }
-                }, 10);
-            });
-        }
-        
-        this._ws = await connectToServer();
+            this._ws.send(JSON.stringify(readyMessage));
+        };
+
         this._ws.onmessage = (webSocketMessage) => {
             setTimeout(async () => {
-                await this._onMessageRevieved(webSocketMessage);
+                const recievedMessage = JSON.parse(webSocketMessage.data);
+                console.log("WSS Message Revieved", recievedMessage);
+                await this._onMessageRevieved(recievedMessage);
             }, 1);
         };
+
+        return promise;
     }
 
-    async _onMessageRevieved(webSocketMessage) {
-        const message = JSON.parse(webSocketMessage.data);
-            
-            switch (message.type) {
-                case "TTSAcknowledgeSocketMessage":
-                    _id = message.id
-                    await this._sendVoices();
-                    break;
-                
-                case "TTSSpeakSocketMessage":
-                    const message = message.message;
-                    this._speak(message);
-                    break;
-            }
+    async _onMessageRevieved(recievedMessage) {
+        if (recievedMessage.type === "TTSAcknowledgeSocketMessage") {
+            this._id = recievedMessage.id
+            await this._sendVoices();
+            return;
+        }
 
-            console.log("WSS Message Revieved", message);
+        if (recievedMessage.type === "TTSSpeakSocketMessage") {
+            const message = recievedMessage.message;
+            const voice = recievedMessage.voice;
+            await this._speak(message, voice);
+        }        
     }
 
     async _sendVoices() {
@@ -93,12 +119,18 @@ class MSLSpeechCommunicationService {
         }));
     }
 
-    _speak(ttsMessage) {
-        var utterThis = new SpeechSynthesisUtterance(ttsMessage);
+    async _speak(ttsMessage, ttsVoiceName) {
+        const utterThis = new SpeechSynthesisUtterance(ttsMessage);
+        const voice = this._voices.find(x => x.name === ttsVoiceName);
+        if (!voice) {
+            await this._sendSpeakError("unable to find voice");
+            return;
+        }
+
         utterThis.voice = this._voices[this._selectedVoiceIndex];
 
         utterThis.addEventListener("start", async () => {
-            await this._sendSpeakEnd();
+            await this._sendSpeakStart();
         });
 
         const speakPromise = new Promise((resolve, reject) => {
@@ -115,30 +147,7 @@ class MSLSpeechCommunicationService {
 
         window.speechSynthesis.speak(utterThis);
 
-        return speakPromise;
-    }
-
-    speak(ttsMessage) {
-        var utterThis = new SpeechSynthesisUtterance(ttsMessage);
-        utterThis.voice = this._voices[this._selectedVoiceIndex];
-
-        const speakPromise = new Promise((resolve, reject) => {
-            utterThis.addEventListener("end", async () => {
-                resolve()
-            });
-
-            utterThis.addEventListener("error", async e => {
-                reject(e)
-            });
-        });
-
-        window.speechSynthesis.speak(utterThis);
-
-        return speakPromise;
-    }
-
-    setSelectedVoice(selectedVoiceIndex) {
-        this._selectedVoiceIndex = selectedVoiceIndex;
+        return await speakPromise;
     }
 }
 
@@ -146,6 +155,7 @@ class MiraSynthLiveTTS extends HTMLElement {
 
     _statusText;
     _voices = [];
+    _selectedVoiceIndex = 0;
 
     constructor() {
         super();
@@ -170,7 +180,7 @@ class MiraSynthLiveTTS extends HTMLElement {
         }
 
         voiceList.addEventListener("change", () => {
-            this._comService.setSelectedVoice(voiceList.value);
+            this._selectedVoiceIndex = voiceList.value;
         });
 
         this._ttsSampleForm.addEventListener("submit", async e => {
@@ -180,13 +190,32 @@ class MiraSynthLiveTTS extends HTMLElement {
             this._ttsSampleForm.querySelector("button").disabled = true;
 
             const message = this._ttsSampleForm.querySelector("textarea").value;
-            await this._comService.speak(message);
+            await this._speak(message);
 
             this._ttsSampleForm.querySelector("textarea").disabled = false;
             this._ttsSampleForm.querySelector("button").disabled = false;
         });
 
-        this._comService = new MSLSpeechCommunicationService(voices);
+        this._comService = new MSLSpeechCommunicationService(this._voices);
+    }
+
+    _speak(ttsMessage) {
+        var utterThis = new SpeechSynthesisUtterance(ttsMessage);
+        utterThis.voice = this._voices[this._selectedVoiceIndex];
+
+        const speakPromise = new Promise((resolve, reject) => {
+            utterThis.addEventListener("end", async () => {
+                resolve()
+            });
+
+            utterThis.addEventListener("error", async e => {
+                reject(e)
+            });
+        });
+
+        window.speechSynthesis.speak(utterThis);
+
+        return speakPromise;
     }
 }
 
