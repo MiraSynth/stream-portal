@@ -11,6 +11,7 @@ import { LoadCanvasWrangler } from "./canvas-wrangler.js"
 import { LoadTwitter } from "./twitter.js"
 import { LoadMSL } from "./msl.js"
 import { LoadMSLApp } from "./mslapp.js"
+import { LoadMSLTTS } from "./msl-tts.js"
 import { ROLL_RESULT_EVENT } from "./events/events.js";
 
 LoadRouter()
@@ -26,6 +27,7 @@ LoadCanvasWrangler();
 LoadTwitter();
 LoadMSL();
 LoadMSLApp();
+LoadMSLTTS();
 
 // const CONFIG = {
 //     apiReadiness: "http://localhost:3000/health/ready",
@@ -116,6 +118,9 @@ document.addEventListener(ROUTER_CONTENT_LOADED_EVENT, e => {
 });
 
 function loadTwitchEmbed() {
+    if (typeof Twitch === 'undefined') {
+        return;
+    }
     new Twitch.Embed("twitch-embed", {
         channel: "mirasynth",
         height: "max-content",

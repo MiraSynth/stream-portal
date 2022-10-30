@@ -1,3 +1,14 @@
+mira-synth-live-app,
+mira-synth-live-tts {
+    p {
+        padding-top: 20px;
+
+        &:first-child {
+            padding-top: 20px;
+        }
+    }
+}
+
 mira-synth-live-app {
     .loader {
         display: block;
@@ -5,14 +16,6 @@ mira-synth-live-app {
 
     .content {
         display: none;
-    }
-
-    p {
-        padding-top: 20px;
-
-        &:first-child {
-            padding-top: 20px;
-        }
     }
 
     msl-redeem-selector {

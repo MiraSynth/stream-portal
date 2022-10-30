@@ -349,7 +349,8 @@ form {
     >input,
     >textarea,
     >input,
-    >button {
+    >button,
+    >select {
         display: block;
         width: 600px;
         height: 60px;
@@ -369,6 +370,10 @@ form {
         }
     }
 
+    >select {
+        border: 0;
+    }
+    
     >input,
     >textarea {
         width: 580px;
@@ -382,8 +387,6 @@ form {
             top: 10px;
             bottom: 10px;
         }
-
-        ;
     }
 
     >button {
