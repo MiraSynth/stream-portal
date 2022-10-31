@@ -137,8 +137,7 @@ class MSLSpeechCommunicationService {
             await this._sendSpeakError("unable to find voice");
             return;
         }
-
-        utterThis.voice = this._voices[this._selectedVoiceIndex];
+        utterThis.voice = voice;
 
         utterThis.addEventListener("start", async () => {
             await this._sendSpeakStart();
