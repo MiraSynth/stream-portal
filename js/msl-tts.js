@@ -1,3 +1,5 @@
+import { delay } from "./utils.js"
+
 class MSLSpeechCommunicationService {
 
     _id = "";
@@ -6,6 +8,8 @@ class MSLSpeechCommunicationService {
     _clients = new Map();
     _voices = [];
     _selectedVoiceIndex = 0;
+    _ports = [4649, 16090, 16091, 16092, 16093, 16094];
+    _selectedPortIndex = 0;
 
     _connected = false;
 
@@ -20,6 +24,7 @@ class MSLSpeechCommunicationService {
                 await this._connect();
             } catch (e) {
                 console.error("WSS Error", e);
+                this._selectedPortIndex++;
             }
         }, 5000);
     }
@@ -34,7 +39,13 @@ class MSLSpeechCommunicationService {
             reject = rej;
         });
 
-        this._ws = new WebSocket('ws://localhost:4649/speak');
+        if (this._selectedPortIndex > this._ports.length - 1) {
+            this._selectedPortIndex = 0;
+        }
+
+        const port = this._ports[this._selectedPortIndex];
+
+        this._ws = new WebSocket(`ws://localhost:${port}/speak`);
 
         let timedOut = false;
         let connectionTimeout = setTimeout(() => {
@@ -169,15 +180,21 @@ class MiraSynthLiveTTS extends HTMLElement {
 
     constructor() {
         super();
+    }
 
+    async connectedCallback() {
         this._statusText = this.querySelector("#status-text");
         if (!this._statusText) {
             return;
         }
 
-        this._voices = window.speechSynthesis.getVoices();
-        if (this._voices.length === 0) {
-            return;
+        this._statusText.innerText = "Loading speach synth...";
+
+        await delay(1000);
+        
+        while (this._voices.length == 0) {
+            this._voices = window.speechSynthesis.getVoices();
+            await delay(200);
         }
 
         this._ttsSampleForm = this.querySelector("#tts-sample-form");
@@ -207,6 +224,8 @@ class MiraSynthLiveTTS extends HTMLElement {
         });
 
         this._comService = new MSLSpeechCommunicationService(this._voices);
+
+        this._statusText.innerText = "Ready to speak!";
     }
 
     _speak(ttsMessage) {
