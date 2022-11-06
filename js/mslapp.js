@@ -143,16 +143,54 @@ class MiraSynthLiveApp extends HTMLElement {
     get token() {
         return this._token;
     }
+
+    async getConfig(path) {
+        const response = await fetch(`http://localhost:8085/api/config?path=${path}`);
+        if (response.status !== 200) {
+            throw Error("Unable to get config from the mothership");
+        }
+    
+        const data = await response.json();
+        return data;
+    }
+    
+    async setConfig(path, value) {
+        const body = {
+            path: path,
+            value: value
+        };
+    
+        const response = await fetch('http://localhost:8085/api/config', {
+            method: 'post',
+            body: JSON.stringify(body),
+            headers: {'Content-Type': 'application/json'}
+        });
+        if (response.status !== 200) {
+            throw Error("Unable to set the config in the mothership");
+        }
+    
+        const data = await response.json();
+        return data;
+    }
 }
 
 class MSLRedeemSelector extends HTMLElement {
 
+    /**
+     * @type MiraSynthLiveApp
+     */
+    _mslApp;
     _selectedRedeemId = "";
-    _redeems = {}
+    _redeems = {};
     _redeemInput;
 
     constructor() {
         super();
+
+        this._mslApp = this.closest("mira-synth-live-app");
+        if (!this._mslApp) {
+            return;
+        }
 
         this._redeemInput = this.querySelector("#tts-redeem-name");
         
@@ -178,15 +216,19 @@ class MSLRedeemSelector extends HTMLElement {
                 x.unselect();
             });
 
-            await setConfig("TTSChatBubble.SpeakRewardId", this._selectedRedeemId);
+            await this._mslApp.setConfig("TTSChatBubble.SpeakRewardId", this._selectedRedeemId);
         });
     }
 
     async _init() {
         this._redeems = await this._getRedeems();
 
-        this._selectedRedeemId = await getConfig("TTSChatBubble.SpeakRewardId");
-        this._redeemInput.value = this._redeems[this._selectedRedeemId].title;
+        this._selectedRedeemId = await  this._mslApp.getConfig("TTSChatBubble.SpeakRewardId");
+        const redeem = this._redeems[this._selectedRedeemId];
+
+        if (redeem) {
+            this._redeemInput.value = redeem.title;
+        }
 
         this._renderRedeems();
     }
@@ -211,7 +253,7 @@ class MSLRedeemSelector extends HTMLElement {
     }
 
     _token() {
-        return getToken(this);
+        return this._mslApp.token;
     }
 }
 
@@ -260,41 +302,59 @@ class MSLRedeemItem extends HTMLElement {
     }
 }
 
-function getToken(element) {
-    const app = element.closest("mira-synth-live-app");
-    return app.token;
-}
+class MSLTTSVoiceSelector extends HTMLElement {
 
-async function getConfig(path) {
-    const response = await fetch(`http://localhost:8085/api/config?path=${path}`);
-    if (response.status !== 200) {
-        throw Error("Unable to get config from the mothership");
+    /**
+     * @type MiraSynthLiveApp
+     */
+    _mslApp;
+    _selectedVoiceIndex = "";
+    _voices = [];
+    _voiceNameInput;
+
+    constructor() {
+        super();
     }
 
-    const data = await response.json();
-    return data;
-}
+    async connectedCallback() {
+        this._mslApp = this.closest("mira-synth-live-app");
+        if (!this._mslApp) {
+            return;
+        }
 
-async function setConfig(path, value) {
-    const body = {
-        path: path,
-        value: value
-    };
+        this._voiceNameInput = this.querySelector("#tts-voice-name");
+        if (!this._voiceNameInput) {
+            return;
+        }
 
-    const response = await fetch('http://localhost:8085/api/config', {
-        method: 'post',
-        body: JSON.stringify(body),
-        headers: {'Content-Type': 'application/json'}
-    });
-    if (response.status !== 200) {
-        throw Error("Unable to set the config in the mothership");
+        await delay(1000);
+        
+        while (this._voices.length == 0) {
+            this._voices = window.speechSynthesis.getVoices();
+            await delay(200);
+        }
+
+        for (const [i, voice] of this._voices.entries()) {
+            const option = document.createElement("option");
+            option.value = i;
+            option.innerText = voice.name;
+            this._voiceNameInput.appendChild(option);
+        }
+
+        this._selectedVoiceIndex = await this._mslApp.getConfig("TTSChatBubble.VoiceIndex");
+        this._voiceNameInput.value = this._selectedVoiceIndex;
+
+        this._voiceNameInput.addEventListener("change", async () => {
+            this._selectedVoiceIndex = this._voiceNameInput.value;
+
+            await this._mslApp.setConfig("TTSChatBubble.VoiceIndex", parseInt(this._selectedVoiceIndex));
+        });
     }
-
-    const data = await response.json();
-    return data;
 }
 
 export function LoadMSLApp() {
+    customElements.define("msl-ttsvoice-selector", MSLTTSVoiceSelector);
+
     customElements.define("msl-redeem-item", MSLRedeemItem);
     customElements.define("msl-redeem-selector", MSLRedeemSelector);
 

@@ -30,7 +30,21 @@
                         </form>
                         <div class="tts-redeems"></div>
                     </msl-redeem-selector>
+                    <msl-ttsvoice-selector>
+                        <form>
+                            <label for="tts-voice-name">Choose your text to speech voice</label>
+                            <select id="tts-voice-name"></select>
+                        </form>
+                    </msl-ttsvoice-selector>
                 </div>
+                <template id="msl-twitch-redeem-template">
+                    <div class="msl-twitch-redeem">
+                        <div class="msl-twitch-redeem-button">
+                            <img src="">
+                        </div>
+                        <span class="msl-twitch-redeem-title"></span>
+                    </div>
+                </template>
             </mira-synth-live-app>
         </section>
     </simple-router>
