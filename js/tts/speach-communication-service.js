@@ -1,7 +1,6 @@
-import { delay } from "./utils.js"
-
 class MSLSpeechCommunicationService {
 
+    _logger;
     _id = "";
     _socket;
     _ws;
@@ -13,17 +12,21 @@ class MSLSpeechCommunicationService {
 
     _connected = false;
 
-    constructor(voices) {
+    constructor(voices, logger) {
         this._voices = voices;
+        this._logger = logger;
+    }
+
+    start() {
         setInterval(async () => {
             if (this._connected) {
                 return;
             }
-            console.log("WSS Attempting to connect");
+            this._logger.log("Attempting to connect MiraSynth Live...");
             try {
                 await this._connect();
             } catch (e) {
-                console.error("WSS Error", e);
+                this._logger.error(e);
                 this._selectedPortIndex++;
             }
         }, 5000);
@@ -59,7 +62,7 @@ class MSLSpeechCommunicationService {
                 connectionTimeout = null;
             }
             this._connected = false;
-            console.log("WSS Disconnected");
+            this._logger.log("Disconnected from MiraSynth Live...");
 
             if (resolve && !timedOut) {
                 resolve();
@@ -71,7 +74,7 @@ class MSLSpeechCommunicationService {
                 clearTimeout(connectionTimeout);
                 connectionTimeout = null;
             }
-            console.log("WSS Connected");
+            this._logger.log("Connected to MiraSynth Live!");
 
             const readyMessage = {
                 type: "TTSCapabilitiesSocketMessage",
@@ -172,82 +175,4 @@ class MSLSpeechCommunicationService {
     }
 }
 
-class MiraSynthLiveTTS extends HTMLElement {
-
-    _statusText;
-    _voices = [];
-    _selectedVoiceIndex = 0;
-
-    constructor() {
-        super();
-    }
-
-    async connectedCallback() {
-        this._statusText = this.querySelector("#status-text");
-        if (!this._statusText) {
-            return;
-        }
-
-        this._statusText.innerText = "Loading speach synth...";
-
-        await delay(1000);
-        
-        while (this._voices.length == 0) {
-            this._voices = window.speechSynthesis.getVoices();
-            await delay(200);
-        }
-
-        this._ttsSampleForm = this.querySelector("#tts-sample-form");
-        const voiceList = this._ttsSampleForm.querySelector("#tts-voices");
-        for (const [i, voice] of this._voices.entries()) {
-            const option = document.createElement("option");
-            option.value = i;
-            option.innerText = voice.name;
-            voiceList.appendChild(option);
-        }
-
-        voiceList.addEventListener("change", () => {
-            this._selectedVoiceIndex = voiceList.value;
-        });
-
-        this._ttsSampleForm.addEventListener("submit", async e => {
-            e.preventDefault();
-
-            this._ttsSampleForm.querySelector("textarea").disabled = true;
-            this._ttsSampleForm.querySelector("button").disabled = true;
-
-            const message = this._ttsSampleForm.querySelector("textarea").value;
-            await this._speak(message);
-
-            this._ttsSampleForm.querySelector("textarea").disabled = false;
-            this._ttsSampleForm.querySelector("button").disabled = false;
-        });
-
-        this._comService = new MSLSpeechCommunicationService(this._voices);
-
-        this._statusText.innerText = "Ready to speak!";
-    }
-
-    _speak(ttsMessage) {
-        var utterThis = new SpeechSynthesisUtterance(ttsMessage);
-        utterThis.voice = this._voices[this._selectedVoiceIndex];
-
-        const speakPromise = new Promise((resolve, reject) => {
-            utterThis.addEventListener("end", async () => {
-                resolve()
-            });
-
-            utterThis.addEventListener("error", async e => {
-                reject(e)
-            });
-        });
-
-        window.speechSynthesis.speak(utterThis);
-
-        return speakPromise;
-    }
-}
-
-export function LoadMSLTTS() {
-    customElements.define("mira-synth-live-tts", MiraSynthLiveTTS);
-}
+export { MSLSpeechCommunicationService };

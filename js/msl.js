@@ -1,5 +1,28 @@
 import { delay } from "./utils.js"
 
+class UILogger extends HTMLElement {
+
+    _statusText;
+
+    async connectedCallback() {
+        this._statusText = this.querySelector("#status-text");
+        if (!this._statusText) {
+            return;
+        }
+    }
+
+    log(message) {
+        this._statusText.innerText = message;
+        console.log("UILogger:", message);
+    }
+
+    error(error) {
+        this._statusText.innerText = error;
+        console.error("UILogger:", error)
+    }
+
+}
+
 class MiraSynthLive extends HTMLElement {
 
     constructor() {
@@ -9,7 +32,7 @@ class MiraSynthLive extends HTMLElement {
 
         if (!this._statusText) {
             return;
-        }
+        }        
 
         setTimeout(async () => {
             await this._startProcess();
@@ -106,5 +129,6 @@ class MiraSynthLive extends HTMLElement {
 }
 
 export function LoadMSL() {
+    customElements.define("ui-logger", UILogger);
     customElements.define("mira-synth-live", MiraSynthLive);
 }

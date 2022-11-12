@@ -1,4 +1,5 @@
 import { delay } from "./utils.js"
+import { MSLSpeechCommunicationService } from "./tts/speach-communication-service.js";
 
 const AppReadyEvent = "MiraSynthLiveApp.AppReady";
 const AppWaitingEvent = "MiraSynthLiveApp.AppWaiting";
@@ -11,7 +12,9 @@ class MiraSynthLiveApp extends HTMLElement {
 
     constructor() {
         super();
+    }
 
+    connectedCallback() {
         window.addEventListener(AppReadyEvent, async () => {
             await this._init();
             this._hideLoader();
@@ -180,6 +183,7 @@ class MSLRedeemSelector extends HTMLElement {
      * @type MiraSynthLiveApp
      */
     _mslApp;
+    _logger;
     _selectedRedeemId = "";
     _redeems = {};
     _redeemInput;
@@ -189,6 +193,11 @@ class MSLRedeemSelector extends HTMLElement {
 
         this._mslApp = this.closest("mira-synth-live-app");
         if (!this._mslApp) {
+            return;
+        }
+
+        this._logger = document.querySelector("ui-logger");
+        if (!this._logger) {
             return;
         }
 
@@ -217,6 +226,7 @@ class MSLRedeemSelector extends HTMLElement {
             });
 
             await this._mslApp.setConfig("TTSChatBubble.SpeakRewardId", this._selectedRedeemId);
+            this._logger.log("Reward updated!");
         });
     }
 
@@ -308,6 +318,7 @@ class MSLTTSVoiceSelector extends HTMLElement {
      * @type MiraSynthLiveApp
      */
     _mslApp;
+    _logger;
     _selectedVoiceIndex = "";
     _voices = [];
     _voiceNameInput;
@@ -322,6 +333,11 @@ class MSLTTSVoiceSelector extends HTMLElement {
             return;
         }
 
+        this._logger = document.querySelector("ui-logger");
+        if (!this._logger) {
+            return;
+        }     
+
         this._voiceNameInput = this.querySelector("#tts-voice-name");
         if (!this._voiceNameInput) {
             return;
@@ -329,6 +345,7 @@ class MSLTTSVoiceSelector extends HTMLElement {
 
         await delay(1000);
         
+        this._logger.log("Fetching voices...");
         while (this._voices.length == 0) {
             this._voices = window.speechSynthesis.getVoices();
             await delay(200);
@@ -348,7 +365,20 @@ class MSLTTSVoiceSelector extends HTMLElement {
             this._selectedVoiceIndex = this._voiceNameInput.value;
 
             await this._mslApp.setConfig("TTSChatBubble.VoiceIndex", parseInt(this._selectedVoiceIndex));
+            this._logger.log("Voice has been changed!");
         });
+
+        this._logger.log("Starting up the text to speach service...");
+        this._comService = new MSLSpeechCommunicationService(this._voices, this._logger);
+        this._comService.start();
+    }
+
+    get voices() {
+        return this._voices;
+    }
+
+    get selectedVoiceIndex() {
+        return this._selectedVoiceIndex;
     }
 }
 
