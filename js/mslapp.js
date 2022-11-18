@@ -190,7 +190,9 @@ class MSLRedeemSelector extends HTMLElement {
 
     constructor() {
         super();
+    }
 
+    async connectedCallback() {
         this._mslApp = this.closest("mira-synth-live-app");
         if (!this._mslApp) {
             return;
@@ -201,16 +203,19 @@ class MSLRedeemSelector extends HTMLElement {
             return;
         }
 
-        this._redeemInput = this.querySelector("#tts-redeem-name");
+        this._conifgPath = this.getAttribute("data-config-path");
+        if (!this._conifgPath) {
+            return;
+        }
+
+        this._redeemInput = this.querySelector("form > input");
         
         if (this._token) {
             window.addEventListener(TokenReceivedEvent, async () => {
                 await this._init();
             });
         } else {
-            setTimeout(async () => {
-                await this._init();
-            });
+            await this._init();
         }
 
         window.addEventListener(RedeemSelectedEvent, async e => {
@@ -225,7 +230,7 @@ class MSLRedeemSelector extends HTMLElement {
                 x.unselect();
             });
 
-            await this._mslApp.setConfig("TTSChatBubble.SpeakRewardId", this._selectedRedeemId);
+            await this._mslApp.setConfig(this._conifgPath, this._selectedRedeemId);
             this._logger.log("Reward updated!");
         });
     }
@@ -233,7 +238,7 @@ class MSLRedeemSelector extends HTMLElement {
     async _init() {
         this._redeems = await this._getRedeems();
 
-        this._selectedRedeemId = await  this._mslApp.getConfig("TTSChatBubble.SpeakRewardId");
+        this._selectedRedeemId = await  this._mslApp.getConfig(this._conifgPath);
         const redeem = this._redeems[this._selectedRedeemId];
 
         if (redeem) {
@@ -257,6 +262,10 @@ class MSLRedeemSelector extends HTMLElement {
         const redeemsContainer = this.querySelector(".tts-redeems");
         redeemsContainer.innerHTML = "";
         for (const [, redeem] of Object.entries(this._redeems)) {
+            if (!redeem.isUserInputRequired) {
+                continue;
+            }
+
             const item = new MSLRedeemItem(redeem, redeem.id === this._selectedRedeemId);
             redeemsContainer.appendChild(item);
         }
@@ -265,10 +274,31 @@ class MSLRedeemSelector extends HTMLElement {
     _token() {
         return this._mslApp.token;
     }
+
+    async saveRedeem(redeemId) {
+        this._selectedRedeemId = redeemId;
+        this._redeemInput.value = this._redeems[this._selectedRedeemId].title;
+
+        this.querySelectorAll("msl-redeem-item").forEach(x => {
+            if (x.redeemId === this._selectedRedeemId) {
+                return;
+            }
+
+            x.unselect();
+        });
+
+        await this._mslApp.setConfig(this._conifgPath, this._selectedRedeemId);
+        this._logger.log("Reward updated!");
+    }
 }
 
 class MSLRedeemItem extends HTMLElement {
     _redeem = null;
+
+    /**
+     * @type MSLRedeemSelector
+     */
+    _redeemSelector;
 
     constructor(redeem, selected) {
         super();
@@ -292,11 +322,12 @@ class MSLRedeemItem extends HTMLElement {
 
     _onClick() {
         this.classList.add("selected");
-        window.dispatchEvent(new CustomEvent(RedeemSelectedEvent, {
-            detail: {
-                redeemId: this._redeem.id
-            }
-        }));
+
+        this._redeemSelector = this.closest("msl-redeem-selector");
+        if (!this._redeemSelector) {
+            return;
+        }
+        this._redeemSelector.saveRedeem(this._redeem.id);
     }
 
     get redeemId() {
@@ -309,6 +340,89 @@ class MSLRedeemItem extends HTMLElement {
 
     select() {
         this.classList.add("selected");
+    }
+}
+
+class MSLAITTSVoiceSelector extends HTMLElement {
+
+    /**
+     * @type MiraSynthLiveApp
+     */
+    _mslApp;
+    _logger;
+    _selectedVoiceIndex = "";
+    _voices = [];
+    _voiceNameInput;
+
+    constructor() {
+        super();
+    }
+
+    async connectedCallback() {
+        this._mslApp = this.closest("mira-synth-live-app");
+        if (!this._mslApp) {
+            return;
+        }
+
+        this._logger = document.querySelector("ui-logger");
+        if (!this._logger) {
+            return;
+        }     
+
+        this._voiceNameInput = this.querySelector("#tts-ai-voice-name");
+        if (!this._voiceNameInput) {
+            return;
+        }
+
+        await delay(1000);
+        
+        this._logger.log("Fetching ai voices...");
+        while (this._voices == null || this._voices.length == 0) {
+            const localStorageVoices = localStorage.getItem("msl.aiproviders.fakeYou.voices");
+            if (localStorageVoices) {
+                this._voices = JSON.parse(localStorageVoices);
+                continue;
+            }
+
+            const ttsVoiceList = await fetch("https://api.fakeyou.com/tts/list");
+            if (ttsVoiceList.status === 200) {
+                const response = await ttsVoiceList.json();
+                this._voices = response.models;
+                localStorage.setItem("msl.aiproviders.fakeYou.voices", JSON.stringify(this._voices));
+                continue;
+            }
+            await delay(200);
+        }
+
+        for (const [_, voice] of this._voices.entries()) {
+            const option = document.createElement("option");
+            option.value = voice.model_token;
+            option.innerText = voice.title;
+            this._voiceNameInput.appendChild(option);
+        }
+
+        this._voiceNameInput.addEventListener("change", async () => {
+            this._selectedVoiceIndex = this._voiceNameInput.value;
+
+            await this._mslApp.setConfig("TTSChatBubble.Voices.AIVoice.VoiceID", this._selectedVoiceIndex);
+            this._logger.log("AI Voice has been changed!");
+        });
+
+        this._selectedVoiceIndex = await this._mslApp.getConfig("TTSChatBubble.Voices.AIVoice.VoiceID");
+        if (!this._selectedVoiceIndex) {
+            this._selectedVoiceIndex = this._voices[0].model_token;
+            await this._mslApp.setConfig("TTSChatBubble.Voices.AIVoice.VoiceID", this._selectedVoiceIndex);
+            this._logger.log("AI Voice has been changed!");
+        }
+        this._voiceNameInput.value = this._selectedVoiceIndex;
+    }
+
+    get voices() {
+        return this._voices;
+    }
+
+    get selectedVoiceIndex() {
+        return this._selectedVoiceIndex;
     }
 }
 
@@ -358,13 +472,13 @@ class MSLTTSVoiceSelector extends HTMLElement {
             this._voiceNameInput.appendChild(option);
         }
 
-        this._selectedVoiceIndex = await this._mslApp.getConfig("TTSChatBubble.VoiceIndex");
+        this._selectedVoiceIndex = await this._mslApp.getConfig("TTSChatBubble.Voices.BrowserVoice.VoiceID");
         this._voiceNameInput.value = this._selectedVoiceIndex;
 
         this._voiceNameInput.addEventListener("change", async () => {
             this._selectedVoiceIndex = this._voiceNameInput.value;
 
-            await this._mslApp.setConfig("TTSChatBubble.VoiceIndex", parseInt(this._selectedVoiceIndex));
+            await this._mslApp.setConfig("TTSChatBubble.Voices.BrowserVoice.VoiceID", this._selectedVoiceIndex);
             this._logger.log("Voice has been changed!");
         });
 
@@ -384,6 +498,7 @@ class MSLTTSVoiceSelector extends HTMLElement {
 
 export function LoadMSLApp() {
     customElements.define("msl-ttsvoice-selector", MSLTTSVoiceSelector);
+    customElements.define("msl-aittsvoice-selector", MSLAITTSVoiceSelector);
 
     customElements.define("msl-redeem-item", MSLRedeemItem);
     customElements.define("msl-redeem-selector", MSLRedeemSelector);
