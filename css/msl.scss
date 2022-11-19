@@ -18,7 +18,7 @@ mira-synth-live-app {
         display: none;
     }
 
-    msl-redeem-selector, msl-ttsvoice-selector {
+    msl-redeem-selector, msl-ttsvoice-selector, msl-bannedword-list-editor, msl-admin-list-editor {
         display: block;
         padding-bottom: 1rem;
         padding: 30px;
@@ -26,6 +26,10 @@ mira-synth-live-app {
         form {
             padding: 0;
             margin-left: 4px;
+
+            select[multiple] {
+                height: 200px;
+            }
         }
 
         .tts-redeems {

@@ -9,6 +9,7 @@ const RedeemSelectedEvent = "MSLRedeemItem.redeemSelectedEvent";
 class MiraSynthLiveApp extends HTMLElement {
 
     _token = "";
+    _isReady = false;
 
     constructor() {
         super();
@@ -44,7 +45,7 @@ class MiraSynthLiveApp extends HTMLElement {
 
     async _healthCheckLoop() {
         let isLive = false;
-        let isReady = false;
+        this._isReady = false;
 
         while (true) {
             while (true) {
@@ -56,8 +57,8 @@ class MiraSynthLiveApp extends HTMLElement {
             }
 
             while (true) {
-                isReady = await this._getReady()
-                if (isReady) {
+                this._isReady = await this._getReady()
+                if (this._isReady) {
                     break;
                 }
                 await delay(1000);
@@ -143,6 +144,10 @@ class MiraSynthLiveApp extends HTMLElement {
         });
     }
 
+    get isReady() {
+        return this._isReady;
+    }
+
     get token() {
         return this._token;
     }
@@ -165,6 +170,104 @@ class MiraSynthLiveApp extends HTMLElement {
     
         const response = await fetch('http://localhost:8085/api/config', {
             method: 'post',
+            body: JSON.stringify(body),
+            headers: {'Content-Type': 'application/json'}
+        });
+        if (response.status !== 200) {
+            throw Error("Unable to set the config in the mothership");
+        }
+    
+        const data = await response.json();
+        return data;
+    }
+
+    async getBannedWord() {
+        const response = await fetch('http://localhost:8085/api/tts/bannedword', {
+            method: 'get',
+            headers: {'Content-Type': 'application/json'}
+        });
+        if (response.status !== 200) {
+            throw Error("Unable to set the config in the mothership");
+        }
+    
+        const data = await response.json();
+        return data;
+    }
+
+    async addBannedWord(bannedWord) {
+        const body = {
+            bannedWord
+        };
+    
+        const response = await fetch('http://localhost:8085/api/tts/bannedword', {
+            method: 'put',
+            body: JSON.stringify(body),
+            headers: {'Content-Type': 'application/json'}
+        });
+        if (response.status !== 200) {
+            throw Error("Unable to set the config in the mothership");
+        }
+    
+        const data = await response.json();
+        return data;
+    }
+
+    async removeBannedWord(bannedWord) {
+        const body = {
+            bannedWord
+        };
+    
+        const response = await fetch('http://localhost:8085/api/tts/bannedword', {
+            method: 'delete',
+            body: JSON.stringify(body),
+            headers: {'Content-Type': 'application/json'}
+        });
+        if (response.status !== 200) {
+            throw Error("Unable to set the config in the mothership");
+        }
+    
+        const data = await response.json();
+        return data;
+    }
+
+    async getAdmin() {
+        const response = await fetch('http://localhost:8085/api/tts/admin', {
+            method: 'get',
+            headers: {'Content-Type': 'application/json'}
+        });
+        if (response.status !== 200) {
+            throw Error("Unable to set the config in the mothership");
+        }
+    
+        const data = await response.json();
+        return data;
+    }
+
+    async addAdmin(admin) {
+        const body = {
+            admin
+        };
+    
+        const response = await fetch('http://localhost:8085/api/tts/admin', {
+            method: 'put',
+            body: JSON.stringify(body),
+            headers: {'Content-Type': 'application/json'}
+        });
+        if (response.status !== 200) {
+            throw Error("Unable to set the config in the mothership");
+        }
+    
+        const data = await response.json();
+        return data;
+    }
+
+    async removeAdmin(admin) {
+        const body = {
+            admin
+        };
+    
+        const response = await fetch('http://localhost:8085/api/tts/admin', {
+            method: 'delete',
             body: JSON.stringify(body),
             headers: {'Content-Type': 'application/json'}
         });
@@ -496,7 +599,171 @@ class MSLTTSVoiceSelector extends HTMLElement {
     }
 }
 
+class MSLListEditor extends HTMLElement {
+
+    /**
+     * @type MiraSynthLiveApp
+     */
+    _mslApp;
+
+    /**
+     * @type 
+     */
+    _logger;
+    _list = {};
+    _itemInput;
+    _itemList;
+    _addButton;
+    _removeButton;
+
+    constructor() {
+        super();
+    }
+
+    async connectedCallback() {
+        this._mslApp = this.closest("mira-synth-live-app");
+        if (!this._mslApp) {
+            return;
+        }
+
+        while (!this._mslApp.isReady) {
+            await delay(1000);
+        }
+
+        this._logger = document.querySelector("ui-logger");
+        if (!this._logger) {
+            return;
+        }
+
+        this._itemInput = this.querySelector("form > input");
+        this._itemList = this.querySelector("form > select");
+        this._addButton = this.querySelector("form > button[data-add]");
+        this._removeButton = this.querySelector("form > button[data-remove]");
+    }
+}
+
+class MSLBannedWordListEditor extends MSLListEditor {
+
+    constructor() {
+        super();
+    }
+
+    async connectedCallback() {
+        await super.connectedCallback();
+
+        this._addButton.addEventListener("click", async e => {
+            e.preventDefault();
+            const newValue = this._itemInput.value.trim();
+            if (!newValue) {
+                this._logger.log("You must enter a word first!");
+                return;
+            }
+
+            const isAdded = await this._mslApp.addBannedWord(newValue);
+            if (isAdded) {
+                this._itemInput.value = "";
+                await this._getList();
+                return;
+            }
+
+            this._logger.log("Unable to save new item!");
+        });
+
+        this._removeButton.addEventListener("click", async e => {
+            e.preventDefault();
+            const valueToDelete = this._itemList.value;
+            if (!valueToDelete) {
+                this._logger.log("Please select a word to remove first!");
+                return;
+            }
+
+            const isRemoved = await this._mslApp.removeBannedWord(valueToDelete);
+            if (isRemoved) {
+                await this._getList();
+                return;
+            }
+
+            this._logger.log("Unable to remove item!");
+        });
+
+        await this._getList();
+    }
+
+    async _getList() {
+        this._itemList.innerHTML = "";
+        this._list = await this._mslApp.getBannedWord();
+        for (const item of this._list) {
+            const option = document.createElement("option");
+            option.value = item;
+            option.innerText = item;
+            this._itemList.appendChild(option);
+        }
+    }
+}
+
+class MSLAdminListEditor extends MSLListEditor {
+
+    constructor() {
+        super();
+    }
+
+    async connectedCallback() {
+        await super.connectedCallback();
+
+        this._addButton.addEventListener("click", async e => {
+            e.preventDefault();
+            const newValue = this._itemInput.value.trim();
+            if (!newValue) {
+                this._logger.log("You must enter an admin name first!");
+                return;
+            }
+
+            const isAdded = await this._mslApp.addAdmin(newValue);
+            if (isAdded) {
+                this._itemInput.value = "";
+                await this._getList();
+                return;
+            }
+
+            this._logger.log("Unable to save new admin!");
+        });
+
+        this._removeButton.addEventListener("click", async e => {
+            e.preventDefault();
+            const valueToDelete = this._itemList.value;
+            if (!valueToDelete) {
+                this._logger.log("Please select an admin to remove first!");
+                return;
+            }
+
+            const isRemoved = await this._mslApp.removeAdmin(valueToDelete);
+            if (isRemoved) {
+                await this._getList();
+                return;
+            }
+
+            this._logger.log("Unable to remove admin!");
+        });
+
+        await this._getList();
+    }
+
+    async _getList() {
+        this._itemList.innerHTML = "";
+        this._list = await this._mslApp.getAdmin();
+        for (const item of this._list) {
+            const option = document.createElement("option");
+            option.value = item;
+            option.innerText = item;
+            this._itemList.appendChild(option);
+        }
+    }
+}
+
 export function LoadMSLApp() {
+    customElements.define("msl-bannedword-list-editor", MSLBannedWordListEditor);
+    customElements.define("msl-admin-list-editor", MSLAdminListEditor);
+    
     customElements.define("msl-ttsvoice-selector", MSLTTSVoiceSelector);
     customElements.define("msl-aittsvoice-selector", MSLAITTSVoiceSelector);
 
