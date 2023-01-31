@@ -134,6 +134,9 @@ async function createImageView(linkName, title, comment, subject, artist, src) {
         return;
     }
 
+    const subjectTextElement = subjectElement.querySelector(".image-gallery-subject");
+    const artistTextElement = subjectElement.querySelector(".image-gallery-artist");
+
     const imgElement = imageViewFigureElement.querySelector("img");
     const captionElement = imageViewFigureElement.querySelector("figcaption");
 
@@ -145,13 +148,16 @@ async function createImageView(linkName, title, comment, subject, artist, src) {
     captionElement.innerHTML = "";
     captionElement.appendChild(imageViewDom.window.document.createTextNode(comment))
 
-    subjectElement.innerHTML = "";
-    subjectElement.appendChild(imageViewDom.window.document.createTextNode(artist ? `${subject} by ` : subject));
+    subjectTextElement.innerHTML = "";
+    subjectTextElement.appendChild(imageViewDom.window.document.createTextNode(subject));
     if (artist) {
         const artistLinkElement = imageViewDom.window.document.createElement("a");
         artistLinkElement.href = artist.href;
         artistLinkElement.innerHTML = artist.name;
-        subjectElement.appendChild(artistLinkElement);
+        artistTextElement.innerHTML = "";
+        artistTextElement.appendChild(artistLinkElement);
+    } else {
+        artistTextElement.remove();
     }
 
     const result = imageViewDom.serialize();
