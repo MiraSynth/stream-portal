@@ -6,6 +6,7 @@
   "scripts": {
     "serve": "node ./tools/basic-server.js",
     "template-sync": "node ./tools/template-sync.js",
+    "gallery-gen": "node ./tools/generators/gallery.generator.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "sass": "sass css/style.scss css/style.css",
     "watch": "npm-watch"
