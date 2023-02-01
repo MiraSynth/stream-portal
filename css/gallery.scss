@@ -11,10 +11,33 @@
     grid-template-columns: auto;
     grid-gap: 0;
 
+    .image-gallery-view {
+        display: block;
+        width: fit-content;
+        height: fit-content;
+        position: relative;
+        margin: auto;
+    }
+
+    .image-gallery-blur {
+        width: 100%;
+        position: absolute;
+        display: block;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+
+        &.active {
+            backdrop-filter: blur(40px);
+        }
+    }
+
     img {
       width: 100%;
       height: auto;
       object-fit: contain;
+      padding: 0;
     }
 
     figcaption {

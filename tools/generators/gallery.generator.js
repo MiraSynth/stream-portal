@@ -54,6 +54,10 @@ async function start() {
             ? exifData.image.XPSubject.filter(x => x > 0).map(x => String.fromCharCode(x)).join("")
             : "No data.";
 
+        const tagsText = exifData && exifData.image && exifData.image.XPKeywords
+            ? exifData.image.XPKeywords.filter(x => x > 0).map(x => String.fromCharCode(x)).join("")
+            : "No data.";
+
         const artistText = exifData && exifData.image && exifData.image.Artist
             ? exifData.image.Artist
             : null;
@@ -86,7 +90,7 @@ async function start() {
         captionElement.innerHTML = "";
         captionElement.appendChild(galleryDom.window.document.createTextNode(titleText));
 
-        await createImageView(linkName, titleText, commentText, subjectText, artistData, image);
+        await createImageView(linkName, titleText, commentText, subjectText, artistData, tagsText, image);
     }
 
     const result = galleryDom.serialize();
@@ -113,7 +117,7 @@ async function resizeImage(imagePath, nameDecoration, size) {
     return newImagePath;
 }
 
-async function createImageView(linkName, title, comment, subject, artist, src) {
+async function createImageView(linkName, title, comment, subject, artist, tags, src) {
     const imageViewDom = await getDOM(path.join("./", "gallery", "gallery.html"));
     if (!imageViewDom) {
         return;
@@ -136,14 +140,21 @@ async function createImageView(linkName, title, comment, subject, artist, src) {
 
     const subjectTextElement = subjectElement.querySelector(".image-gallery-subject");
     const artistTextElement = subjectElement.querySelector(".image-gallery-artist");
-
     const imgElement = imageViewFigureElement.querySelector("img");
+    const galleryBlurElement = imageViewFigureElement.querySelector(".image-gallery-blur");
+    if (tags.includes("nsfw")) {
+        galleryBlurElement.classList.add("active");
+        const tagsSplit = tags.split(";");
+        const imageUri = tagsSplit[1];
+        imgElement.src = imageUri;
+    } else {
+        imgElement.src = src;
+    }
+    
     const captionElement = imageViewFigureElement.querySelector("figcaption");
 
     headerElement.innerHTML = "";
     headerElement.appendChild(imageViewDom.window.document.createTextNode(title))
-
-    imgElement.src = src;
 
     captionElement.innerHTML = "";
     captionElement.appendChild(imageViewDom.window.document.createTextNode(comment))
