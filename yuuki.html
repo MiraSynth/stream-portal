@@ -3,7 +3,7 @@
   <head>
    <script type="text/javascript">
      async function it() {
-      const a = fetch("https://gateway.gofundme.com/web-gateway/v1/feed/63yxmf-helping-yuuki-with-her-new-cancer-treatments/donations?limit=1&offset=0&sort=recent");
+      const a = await fetch("https://gateway.gofundme.com/web-gateway/v1/feed/63yxmf-helping-yuuki-with-her-new-cancer-treatments/donations?limit=1&offset=0&sort=recent");
       const data = await a.json();
       console.log(a);
      }
