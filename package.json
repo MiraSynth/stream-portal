@@ -7,6 +7,7 @@
     "serve": "node ./tools/basic-server.js",
     "template-sync": "node ./tools/template-sync.js",
     "gallery-gen": "node ./tools/generators/gallery.generator.js",
+    "article-gen": "node ./tools/generators/article.generator.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "sass": "sass css/style.scss css/style.css",
     "watch": "npm-watch"
@@ -26,7 +27,8 @@
     "http-server": "^14.0.0",
     "jsdom": "^16.4.0",
     "npm-watch": "^0.11.0",
-    "sass": "^1.32.2"
+    "sass": "^1.32.2",
+    "showdown": "^2.1.0"
   },
   "watch": {
     "sass": "./css/*.scss"

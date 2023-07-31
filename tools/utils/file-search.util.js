@@ -17,6 +17,17 @@ async function findByType(path, type) {
     return files;
 }
 
+async function findDirBySuffix(path, suffix) {
+    const entries = await readdir(path, { withFileTypes: true });
+
+    const files = entries
+        .filter(file => file.isDirectory() && file.name.endsWith(suffix))
+        .map(file => join(path, file.name));
+
+    return files;
+}
+
 module.exports = {
-    findByType
+    findByType,
+    findDirBySuffix
 }

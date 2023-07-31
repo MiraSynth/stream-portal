@@ -1,0 +1,98 @@
+<!DOCTYPE html><html lang="en" xmlns="http://www.w3.org/1999/html"><head>
+    <meta charset="UTF-8">
+    <base href="https://mirasynth.stream/" target="_blank">
+    <title>Little bite or a big bite?</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+
+<body>
+
+<div class="main-content">
+    <nav class="main-menu">
+        <a class="item" href="/" data-menu="home">Home</a>
+        <a class="item" href="/gallery/">Gallery</a>
+        <a class="item" href="/articles/">Articles</a>
+        <!-- <a class="item" href="/mirasynthlive" data-menu="mirasynthlive">MiraSynth Live</a> -->
+    </nav>
+
+    <simple-router>
+        <section class="document-section"><h1 id="gpupartitioningwithhyperv">GPU Partitioning with Hyper-V</h1>
+<p>Staying safe by virtualizing your gaming PC with GPU Partitioning. Do note that the usage of the following tutorial may cause damage to your windows installation a worst, so please make sure all your precious files are backup up safely before continuing. Happy safe gaming! 💜 </p>
+<h2 id="assumptions">Assumptions</h2>
+<p>This will assume you already know how to enable Hyper-V and install Windows, until we get to enable the GPU share;</p>
+<ul>
+<li>Use <code>Generation 2</code> when creating</li>
+<li>Disable <code>Settings &gt; Checkpoints</code></li>
+<li>In the VMs enable <code>Settings &gt; Integration Services &gt; Guest Services</code></li>
+</ul>
+<h2 id="copyingyourdrivers">Copying your Drivers</h2>
+<p>You will need to install the latest NVIDIA drivers for the following to work properly</p>
+<ul>
+<li>Go to <code>windows/System32</code> and copy all the NVIDIA driver files, they all start with <code>nv</code>.</li>
+<li>Paste them in a temp folder on your Desktop</li>
+<li>Go to <code>windows/System32/DriverStore/FileRepository</code> and copy the entire folder that contains the NVIDIA driver. There could be multiple, so just copy the last created. Ex. Starts with <code>nv_dispig.inf_...</code></li>
+<li>Back in that temporary folder on your Desktop, create the following folder structure <code>HostDriverStore/FileRepository</code> and copy that <code>nv_dispig.inf_...</code> folder in it</li>
+<li>Zip the entire contents of that temp folder on your desktop, name it <code>Drivers.zip</code></li>
+</ul>
+<h2 id="preparingyourvm">Preparing your VM</h2>
+<p>This is when we are going to copy the files to you VM</p>
+<ul>
+<li>You will need to start Poweshell with administrator privileges</li>
+<li>Enter the command <code>Copy-VMFile "[VM-NAME]" -SourcePath "C:\Users\[USER]\Desktop\[TEMP-FOLDER]\Drivers.zip" -DestinationPath "C:\Drivers.zip" -CreateFullPath -FileSource Host</code></li>
+<li>Replace all placeholder marked with square brackets to reflect your system <code>[...]</code></li>
+<li>Once the copy is ready, Start the VM</li>
+<li>Go to <code>C:\Drivers.zip</code> and unzip the drivers</li>
+<li>Copy all the files in the <code>System32</code> directory, allow it to replace files as it copies</li>
+<li>Turn the VM Off</li>
+<li>In the VMs <code>Settings &gt; Integration Services &gt; Guest Services</code> disable it</li>
+</ul>
+<h2 id="enablinggpupartitioning">Enabling GPU Partitioning</h2>
+<p>This will share your hosts GPU with the VM</p>
+<ul>
+<li>Open ** PowerShell ISE ** with admin privileges</li>
+<li>Run the command <code>Set-ExecutionPolicy Unrestricted</code> to be able to run privileged commands</li>
+<li>Copy and paste the following in the main ISE editor windows, replace <code>[VM-NAME]</code> with your VMs name</li>
+</ul>
+<pre><code>$vm = "[VM-NAME]"
+
+Add-VMGpuPartitionAdapter -VMName $vm
+Set-VMGpuPartitionAdapter -VMName $vm -MinPartitionVRAM 80000000 -MaxPartitionVRAM 100000000 -OptimalPartitionVRAM 100000000 -MinPartitionEncode 80000000 -MaxPartitionEncode 100000000 -OptimalPartitionEncode 100000000 -MinPartitionDecode 80000000 -MaxPartitionDecode 100000000 -OptimalPartitionDecode 100000000 -MinPartitionCompute 80000000 -MaxPartitionCompute 100000000 -OptimalPartitionCompute 100000000
+
+Set-VM -GuestControlledCacheTypes $true -VMName $vm
+Set-VM -LowMemoryMappedIoSpace 1Gb -VMName $vm
+Set-VM –HighMemoryMappedIoSpace 32GB –VMName $vm
+</code></pre>
+<ul>
+<li>Run the script by clicking the play button at the top toolbar in ISE</li>
+<li>When done, run the command <code>Set-ExecutionPolicy Restricted</code> to disallow rogue scripts from executing</li>
+<li>Start your VM</li>
+</ul>
+<h2 id="verifyyourgpuandvm">Verify your GPU and VM</h2>
+<ul>
+<li>Login to Windows</li>
+<li>Open <code>Device Manager</code></li>
+<li>Under <code>Display adaptors</code> make sure that your NVIDIA Graphics Card model is shown and enabled. </li>
+</ul>
+<h2 id="setacustomresolution">Set a custom resolution</h2>
+<ul>
+<li>With the VM turned off</li>
+<li>Open Powershell</li>
+<li>Run the command <code>Set-VMVideo -VMName "[VM-NAME]" -resolutiontype single -HorizontalResolution 2560 -VerticalResolution 1440</code>, replace the H and Y resolutions to ones that suit your needs.</li>
+</ul>
+<p>And your done! 🎉 Please let me know if you find any mistakes in the instructions!</p>
+<p>***I will probably create a video tutorial for this too, only if i'm not feeling lazy 😅 ***</p></section>
+    </simple-router>
+
+    <footer>
+        <console-commander></console-commander>
+    </footer>
+</div>
+
+<privacy-notice></privacy-notice>
+
+<div class="loader-blinds"></div>
+<script type="module" src="js/script.js"></script>
+<script async="" src="https://embed.twitch.tv/embed/v1.js"></script>
+
+</body></html>
