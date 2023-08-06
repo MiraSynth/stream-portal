@@ -175,4 +175,32 @@ class MSLSpeechCommunicationService {
     }
 }
 
-export { MSLSpeechCommunicationService };
+class SpeechCommunicationService {
+
+    _id = "";
+    _voices = [];
+    _selectedVoiceIndex = 0;
+    _selectedPortIndex = 0;
+
+    _connected = false;
+
+    constructor(voices) {
+        this._voices = voices;
+    }
+
+    speak(ttsMessage, ttsVoiceName) {
+        const utterThis = new SpeechSynthesisUtterance(ttsMessage);
+        const voice = this._voices.find(x => x.name === ttsVoiceName);
+        if (!voice) {
+            return;
+        }
+        utterThis.voice = voice;
+
+        window.speechSynthesis.speak(utterThis);
+    }
+}
+
+export {
+    MSLSpeechCommunicationService,
+    SpeechCommunicationService
+};

@@ -1,5 +1,5 @@
 import { delay } from "./utils.js"
-import { MSLSpeechCommunicationService } from "./tts/speach-communication-service.js";
+import { MSLSpeechCommunicationService, SpeechCommunicationService } from "./tts/speach-communication-service.js";
 
 const AppReadyEvent = "MiraSynthLiveApp.AppReady";
 const AppWaitingEvent = "MiraSynthLiveApp.AppWaiting";
@@ -599,6 +599,63 @@ class MSLTTSVoiceSelector extends HTMLElement {
     }
 }
 
+class TTSVoiceSelector extends HTMLElement {
+
+    _selectedVoiceIndex = "";
+    _voices = [];
+    _voiceNameInput;
+
+    constructor() {
+        super();
+    }
+
+    async connectedCallback() {
+        this._voiceNameInput = this.querySelector("#tts-voice-name");
+        if (!this._voiceNameInput) {
+            return;
+        }
+
+        await delay(1000);
+        
+        while (this._voices.length == 0) {
+            this._voices = window.speechSynthesis.getVoices();
+            await delay(200);
+        }
+
+        for (const [i, voice] of this._voices.entries()) {
+            const option = document.createElement("option");
+            option.value = i;
+            option.innerText = voice.name;
+            this._voiceNameInput.appendChild(option);
+        }
+
+        this._selectedVoiceIndex = "0";
+        this._voiceNameInput.value = this._selectedVoiceIndex;
+
+        this._voiceNameInput.addEventListener("change", async () => {
+            this._selectedVoiceIndex = this._voiceNameInput.value;
+        });
+
+        this._comService = new SpeechCommunicationService(this._voices);
+
+        var userInput = this.querySelector('#tts-text');
+        var submitButton = this.querySelector('button[type="submit"]');
+        submitButton.addEventListener("click", async (e) => {
+            e.preventDefault();
+
+            this._comService.speak(userInput.value, this._voices[this._voiceNameInput.value].name);
+        });
+    }
+
+    get voices() {
+        return this._voices;
+    }
+
+    get selectedVoiceIndex() {
+        return this._selectedVoiceIndex;
+    }
+}
+
 class MSLListEditor extends HTMLElement {
 
     /**
@@ -765,6 +822,7 @@ export function LoadMSLApp() {
     customElements.define("msl-admin-list-editor", MSLAdminListEditor);
     
     customElements.define("msl-ttsvoice-selector", MSLTTSVoiceSelector);
+    customElements.define("ttsvoice-selector", TTSVoiceSelector)
     customElements.define("msl-aittsvoice-selector", MSLAITTSVoiceSelector);
 
     customElements.define("msl-redeem-item", MSLRedeemItem);
