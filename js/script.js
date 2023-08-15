@@ -11,6 +11,7 @@ import { LoadCanvasWrangler } from "./canvas-wrangler.js"
 import { LoadTwitter } from "./twitter.js"
 import { LoadMSL } from "./msl.js"
 import { LoadMSLApp } from "./mslapp.js"
+import { LoadLoadGoogleOAuth } from "./google.js"
 import { ROLL_RESULT_EVENT } from "./events/events.js";
 
 LoadRouter()
@@ -26,6 +27,7 @@ LoadCanvasWrangler();
 LoadTwitter();
 LoadMSL();
 LoadMSLApp();
+LoadLoadGoogleOAuth();
 
 // const CONFIG = {
 //     apiReadiness: "http://localhost:3000/health/ready",

@@ -1,0 +1,36 @@
+<!DOCTYPE html><html lang="en" xmlns="http://www.w3.org/1999/html"><head>
+    <meta charset="UTF-8">
+    <base href="https://mirasynth.stream/" target="_blank">
+    <title>Little bite or a big bite?</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+
+<body>
+
+<div class="main-content">
+    <nav class="main-menu">
+        <a class="item" href="/" data-menu="home">Home</a>
+        <a class="item" href="/gallery/">Gallery</a>
+        <a class="item" href="/articles/">Articles</a>
+        <!-- <a class="item" href="/mirasynthlive" data-menu="mirasynthlive">MiraSynth Live</a> -->
+    </nav>
+
+    <simple-router>
+        <section class="document-section">
+            <google-oauth></google-oauth>
+        </section>
+    </simple-router>
+
+    <footer>
+        <console-commander></console-commander>
+    </footer>
+</div>
+
+<privacy-notice></privacy-notice>
+
+<div class="loader-blinds"></div>
+<script type="module" src="js/script.js"></script>
+<script async="" src="https://embed.twitch.tv/embed/v1.js"></script>
+
+</body></html>
