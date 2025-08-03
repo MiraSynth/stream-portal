@@ -1,5 +1,5 @@
 {
-  "name": "github-experiment",
+  "name": "stream-portal",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -18,7 +18,7 @@
   "dependencies": {
     "cors": "^2.8.5",
     "isomorphic-git": "^1.8.0",
-    "sharp": "^0.31.1",
+    "sharp": "^0.34.3",
     "three": "^0.125.2"
   },
   "devDependencies": {

@@ -8,10 +8,6 @@ import { LoadCommander } from "./commander.js"
 import { LoadPrivacyNotice } from "./privacy-notice.js"
 import { LoadAudioPlayer } from "./audio-player.js"
 import { LoadCanvasWrangler } from "./canvas-wrangler.js"
-import { LoadTwitter } from "./twitter.js"
-import { LoadMSL } from "./msl.js"
-import { LoadMSLApp } from "./mslapp.js"
-import { LoadLoadGoogleOAuth } from "./google.js"
 import { ROLL_RESULT_EVENT } from "./events/events.js";
 
 LoadRouter()
@@ -24,53 +20,6 @@ LoadCommander();
 LoadPrivacyNotice();
 LoadAudioPlayer();
 LoadCanvasWrangler();
-LoadTwitter();
-LoadMSL();
-LoadMSLApp();
-LoadLoadGoogleOAuth();
-
-// const CONFIG = {
-//     apiReadiness: "http://localhost:3000/health/ready",
-//     apiLiveness: "http://localhost:3000/health/live",
-//     apiBase: "http://localhost:3000/api/v1",
-// }
-//
-// let ApiReady = false
-// let CheckingServerHealth = false
-// const ReadyIntervalRef = setInterval(async () => {
-//     if (CheckingServerHealth) {
-//         return
-//     }
-//
-//     CheckingServerHealth = true
-//
-//     try {
-//         const responseLive = await fetch(`${CONFIG.apiLiveness}`)
-//         if (responseLive.status !== 200) {
-//             CheckingServerHealth = false
-//             return
-//         }
-//
-//         const responseReady = await fetch(`${CONFIG.apiReadiness}`)
-//         if (responseReady.status !== 200) {
-//             CheckingServerHealth = false
-//             return
-//         }
-//
-//         clearInterval(ReadyIntervalRef)
-//         ApiReady = true
-//     } catch {}
-//
-//     CheckingServerHealth = false
-//
-//     const apiReadyEvent = new Event("ME:ApiReady")
-//     document.dispatchEvent(apiReadyEvent)
-// }, 250)
-//
-//
-// document.addEventListener("ME:ApiReady", async () => {
-//     // not yet implemented
-// })
 
 document.addEventListener(ROLL_RESULT_EVENT, e => {
     const ci = document.querySelector(".console-input");
@@ -78,26 +27,6 @@ document.addEventListener(ROLL_RESULT_EVENT, e => {
 });
 
 let baubleElementDurations = [];
-
-// document.addEventListener("audio-player", e => {
-//     const pushValue = e.detail;
-//     const baubleElements = document.querySelectorAll(".circle-container");
-//
-//     if (pushValue < 3) {
-//         return;
-//     }
-//
-//     const index = Math.round(Math.random() * baubleElements.length);
-//     const baubleElement = baubleElements[index];
-//     const animationDuration = baubleElementDurations[index];
-//     if (Number.isNaN(animationDuration)) {
-//         return;
-//     }
-//
-//     const result = Math.round(animationDuration - (animationDuration / 2));
-//     baubleElement.style.animationDuration = `${result}ms`;
-//     console.log(result);
-// });
 
 window.addEventListener("DOMContentLoaded", () => {
     const baubleElements = document.querySelectorAll(".circle-container");
@@ -112,7 +41,7 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 document.addEventListener(ROUTER_CONTENT_LOADED_EVENT, e => {
-    if (e.detail.pageId == "/") {
+    if (e.detail.pageId === "/") {
         loadTwitchEmbed()
     }
 });

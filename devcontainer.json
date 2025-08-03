@@ -1,0 +1,9 @@
+{
+  "name": "stream-portal",
+  forwardPorts: [
+    8080
+  ],
+  build: {
+    dockerfile: "Dockerfile"
+  }
+}
