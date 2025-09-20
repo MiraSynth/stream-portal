@@ -1,4 +1,4 @@
-import * as THREE from "https://unpkg.com/three/build/three.module.js";
+import * as THREE from "../../../vendor/three.module.js";
 import {TexturedParticleContainer} from "../particles.js";
 import {TRANSLATE_VECTOR_CONTEXT_STATE_STOPPED, translateVector} from "../../animations/translate.js";
 

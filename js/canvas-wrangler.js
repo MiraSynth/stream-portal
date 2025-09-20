@@ -1,4 +1,4 @@
-import * as THREE from "https://unpkg.com/three/build/three.module.js";
+import * as THREE from "./vendor/three.module.js";
 import {FloatingBokeh} from "./bubbles/particles/presets/floating-bokeh.js"
 import {ShootingBokeh} from "./bubbles/particles/presets/shooting-bokeh.js"
 import {process} from "./bubbles/animations/translate.js"
@@ -14,13 +14,14 @@ export function LoadCanvasWrangler() {
     const camera = new THREE.OrthographicCamera(left, right, top, bottom, near, far);
     camera.zoom = 1;
 
+    const canvas = document.getElementById("background-canvas")
+
     const renderer = new THREE.WebGLRenderer({
-        alpha: true
+        alpha: true,
+        canvas: canvas
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearAlpha(0);
-    const canvas = renderer.domElement;
-    document.body.prepend(canvas);
 
     const textureLoader = new THREE.TextureLoader();
 
@@ -77,5 +78,5 @@ export function LoadCanvasWrangler() {
         delta = Date.now() - timeStart;
     }
 
-    animate();
+    animate().then(r => console.log(r));
 }

@@ -1,12 +1,18 @@
 <!DOCTYPE html><html lang="en" xmlns="http://www.w3.org/1999/html"><head>
     <meta charset="UTF-8">
     <base href="https://mirasynth.stream/" target="_blank">
-    <title>Little bite or a big bite?</title>
+    <title>welcome to the simulation - trans rights are human rights</title>
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&amp;family=Roboto:ital,wght@0,100..900;1,100..900&amp;display=swap" rel="stylesheet">
 </head>
 
 <body>
+
+<canvas id="background-canvas"></canvas>
 
 <div class="main-content">
     <nav class="main-menu">
@@ -16,7 +22,7 @@
     </nav>
 
     <simple-router>
-        <section class="document-section"><h1 id="gpupartitioningwithhyperv">GPU Partitioning with Hyper-V</h1>
+        <section class="document-section"><article><h1 id="gpupartitioningwithhyperv">GPU Partitioning with Hyper-V</h1>
 <p>Staying safe by virtualizing your gaming PC with GPU Partitioning. Do note that the usage of the following tutorial may cause damage to your windows installation a worst, so please make sure all your precious files are backup up safely before continuing. Happy safe gaming! 💜 </p>
 <h2 id="assumptions">Assumptions</h2>
 <p>This will assume you already know how to enable Hyper-V and install Windows, until we get to enable the GPU share;</p>
@@ -56,7 +62,19 @@
 <pre><code>$vm = "[VM-NAME]"
 
 Add-VMGpuPartitionAdapter -VMName $vm
-Set-VMGpuPartitionAdapter -VMName $vm -MinPartitionVRAM 80000000 -MaxPartitionVRAM 100000000 -OptimalPartitionVRAM 100000000 -MinPartitionEncode 80000000 -MaxPartitionEncode 100000000 -OptimalPartitionEncode 100000000 -MinPartitionDecode 80000000 -MaxPartitionDecode 100000000 -OptimalPartitionDecode 100000000 -MinPartitionCompute 80000000 -MaxPartitionCompute 100000000 -OptimalPartitionCompute 100000000
+Set-VMGpuPartitionAdapter -VMName $vm \
+    -MinPartitionVRAM 80000000 \
+    -MaxPartitionVRAM 100000000 \
+    -OptimalPartitionVRAM 100000000 \
+    -MinPartitionEncode 80000000 \
+    -MaxPartitionEncode 100000000 \
+    -OptimalPartitionEncode 100000000 \
+    -MinPartitionDecode 80000000 \
+    -MaxPartitionDecode 100000000 \
+    -OptimalPartitionDecode 100000000 \
+    -MinPartitionCompute 80000000 \
+    -MaxPartitionCompute 100000000 \
+    -OptimalPartitionCompute 100000000
 
 Set-VM -GuestControlledCacheTypes $true -VMName $vm
 Set-VM -LowMemoryMappedIoSpace 1Gb -VMName $vm
@@ -80,7 +98,7 @@ Set-VM –HighMemoryMappedIoSpace 32GB –VMName $vm
 <li>Run the command <code>Set-VMVideo -VMName "[VM-NAME]" -resolutiontype single -HorizontalResolution 2560 -VerticalResolution 1440</code>, replace the H and Y resolutions to ones that suit your needs.</li>
 </ul>
 <p>And your done! 🎉 Please let me know if you find any mistakes in the instructions!</p>
-<p>***I will probably create a video tutorial for this too, only if i'm not feeling lazy 😅 ***</p></section>
+<p><strong>I will probably create a video tutorial for this too, only if i'm not feeling lazy 😅</strong></p></article></section>
     </simple-router>
 
     <footer>
@@ -88,11 +106,6 @@ Set-VM –HighMemoryMappedIoSpace 32GB –VMName $vm
     </footer>
 </div>
 
-<privacy-notice></privacy-notice>
-
-<div class="loader-blinds"></div>
 <script type="module" src="js/script.js"></script>
-<!--<script async="" src="https://embed.twitch.tv/embed/v1.js"></script>-->
-
 
 </body></html>

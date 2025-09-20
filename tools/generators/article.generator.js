@@ -6,12 +6,13 @@ const showdown = require("showdown");
 const { promises: { readFile, writeFile }, existsSync } = require("fs");
 
 const { findDirBySuffix } = require("../utils/file-search.util")
+const {createElement} = require("jsdom/lib/jsdom/living/helpers/create-element");
 
 async function start() {
     const target = "./articles/index.html";
     const articles = (await findDirBySuffix("./articles", "-article"));
 
-    var converter = new showdown.Converter();
+    let converter = new showdown.Converter();
 
     for (const article of articles) {
         const articleContent = await readFile(path.join("./", article, "content.md"), "utf8");
@@ -23,7 +24,10 @@ async function start() {
         }
 
         const documentSectionElement = articleDom.window.document.querySelector(".document-section");
-        documentSectionElement.innerHTML = html;
+        const articleEl = articleDom.window.document.createElement("article")
+        articleEl.innerHTML = html;
+        documentSectionElement.innerHTML = ""
+        documentSectionElement.appendChild(articleEl)
 
         const result = articleDom.serialize();
         const outputPath = path.join("./", article, "index.html")

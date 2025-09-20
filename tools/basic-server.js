@@ -45,6 +45,7 @@ const mimeTypes = {
     ".jgp": "image/jpeg",
     ".css": "text/css",
     ".js": "text/javascript",
+    ".mjs": "application/octet-stream",
     ".png": "image/png",
     ".ico": "image/x-icon",
     ".mp3": "audio/mpeg",

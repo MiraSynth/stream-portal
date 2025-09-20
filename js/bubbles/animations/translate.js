@@ -1,4 +1,4 @@
-import * as THREE from "https://unpkg.com/three/build/three.module.js";
+import * as THREE from "../../vendor/three.module.js";
 import {EASE_INOUT_QUAD, ease} from "./easing.js";
 
 export const TRANSLATE_VECTOR_CONTEXT_STATE_STOPPED = 0;
