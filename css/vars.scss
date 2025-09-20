@@ -1,0 +1,29 @@
+@use 'sass:color';
+
+$base-color: #210439;
+$contrast-color: #9476AB;
+$accent-color: #714C8F;
+
+:root {
+  --l: 50%; /*the initial lightness*/
+
+  --base-font-size: 16px;
+  --base-color: #{$base-color};
+  --contrast-color: #{$contrast-color};
+
+  --accent-color: #{$accent-color};
+  --color-primary-3: #381356;
+  --color-primary-4: #522B72;
+
+  --menu-background: #{color.change(color.scale($base-color, $lightness: -0.5%), $alpha: 0.9)};
+
+  --panel-background: #{color.change(color.scale($accent-color, $lightness: -0.5%), $alpha: 0.75)};
+
+  --form-background-idle: #{color.change(color.scale($accent-color, $lightness: -0.5%), $alpha: 0.5)};
+  --form-background-hover: #{color.change(color.scale($accent-color, $lightness: -0.5%), $alpha: 0.75)};
+  --form-background-focus: #{color.change(color.scale($accent-color, $lightness: -0.5%), $alpha: 0.9)};
+
+  --form-text-color-idle: #{$contrast-color};
+  --form-text-color-hover: #{color.scale($contrast-color, $lightness: 40%)};
+  --form-text-color-focus: #{color.scale($contrast-color, $lightness: 45%)};
+}

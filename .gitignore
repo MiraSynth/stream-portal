@@ -117,3 +117,4 @@ dist
 apps
 repo
 .idea
+.DS_Store

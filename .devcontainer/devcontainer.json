@@ -4,6 +4,6 @@
     8080
   ],
   build: {
-    dockerfile: "Dockerfile"
-  }
+    dockerfile: "../Dockerfile"
+  },
 }
