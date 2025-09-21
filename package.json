@@ -5,32 +5,27 @@
   "main": "index.js",
   "scripts": {
     "serve": "node ./tools/basic-server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "sass": "sass --watch css/style.scss:css/style.css",
     "template-sync": "node ./tools/template-sync.js",
     "gallery-gen": "node ./tools/generators/gallery.generator.js",
-    "article-gen": "node ./tools/generators/article.generator.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "sass": "sass css/style.scss css/style.css",
-    "watch": "npm-watch"
+    "article-gen": "node ./tools/generators/article.generator.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["stream", "portal", "mira", "synth", "blog"],
+  "author": "MiraSynth",
+  "license": "MIT",
   "dependencies": {
     "cors": "^2.8.5",
-    "isomorphic-git": "^1.8.0",
-    "sharp": "^0.34.3",
-    "three": "^0.125.2"
+    "isomorphic-git": "^1.33.1",
+    "sharp": "^0.34.4",
+    "three": "^0.180.0"
   },
   "devDependencies": {
     "exif": "^0.6.0",
-    "express": "^4.17.1",
-    "http-server": "^14.0.0",
-    "jsdom": "^16.4.0",
-    "npm-watch": "^0.11.0",
-    "sass": "^1.32.2",
+    "express": "^5.1.0",
+    "http-server": "^14.1.1",
+    "jsdom": "^27.0.0",
+    "sass": "^1.93.0",
     "showdown": "^2.1.0"
-  },
-  "watch": {
-    "sass": "./css/*.scss"
   }
 }

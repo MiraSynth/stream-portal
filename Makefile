@@ -5,13 +5,16 @@ build:
 	npm run sass
 
 watch:
-	npm watch
+	npm run sass &
+	npm run serve
 
 sync-template:
 	npm run template-sync
 
-generate-gallery:
-	npm gallery-gen
+sync-gallery:
+	npm run gallery-gen
 
-generate-articles:
-	npm article-gen
+sync-articles:
+	npm run article-gen
+
+sync: sync-template sync-gallery sync-template

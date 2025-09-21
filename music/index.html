@@ -18,6 +18,7 @@
     <nav class="main-menu">
         <a class="item" href="/" data-menu="home">Home</a>
         <a class="item" href="/gallery/">Gallery</a>
+        <a class="item" href="/music/">Music</a>
         <a class="item" href="/articles/">Articles</a>
     </nav>
 
@@ -31,13 +32,35 @@
             </p>
 
             <p>
-                The music below is free to download and re-use, as long as a little attribution is give. Always support
+                The music below is free to download and re-use, as long as a little attribution is given. Always support
                 creators, even if things are free. For more music and information, please visit
-                <a href="https://soundcloud.com/miradella" target="_blank">SoundCloud</a> to read up on the licenses available, most
+                <a href="https://soundcloud.com/mirasynth" target="_blank">SoundCloud</a> to read up on the licenses available, most
                 are under creative commons. Enjoy and thank you for listening.
             </p>
 
             <section class="music-gallery">
+                <audio-player src="assets/music/gallery/ghosties-theme/ghosties-theme.mp3">
+                    <figure>
+                        <img src="assets/music/gallery/ghosties-theme/ghosties-theme.jpg" alt="album art">
+                        <a class="playpause-button">LOD</a>
+                    </figure>
+
+                    <h3>Ghosties Theme</h3>
+                    <article>
+                        <p>
+                            The stream intro theme for <a href="https://bsky.app/profile/ghostie-toast.bsky.social" target="_blank">@ghostie-toast</a>
+                        </p>
+                        <div class="collapsible-wrapper">
+                            <input id="collapsible-ghosties-theme" type="checkbox">
+                            <label for="collapsible-ghosties-theme"></label>
+                            <p class="collapsible-content">
+                                <strong>No more information is available</strong>
+                            </p>
+                        </div>
+                    </article>
+                    <input type="range" min="0" max="0" value="0">
+                </audio-player>
+
                 <audio-player src="assets/music/gallery/back-to-darkness/back-to-darkness.mp3">
                     <figure>
                         <img src="assets/music/gallery/back-to-darkness/back-to-darkness.jpg" alt="album art">
@@ -48,7 +71,7 @@
                     <article>
                         <p>
                             This is not how I feel, nor who I am. This is a state of mind that rekindles memories of
-                            ever growing thoughts. The anxious mind stays awake thinking and pondering, till there is
+                            ever-growing thoughts. The anxious mind stays awake thinking and pondering, till there is
                             nothing to think and ponder about anymore. Sleep tonight and think of nothing else except the
                             descent into peaceful familiarity.
                         </p>
@@ -56,9 +79,9 @@
                             <input id="collapsible-descending-familiarity" type="checkbox">
                             <label for="collapsible-descending-familiarity"></label>
                             <p class="collapsible-content">
-                                Sample Attribution:
+                                <strong>Sample Attribution:</strong>
                                 <br>
-                                freesound.org/people/MiraclesHappen/sounds/457585/
+                                <a href="freesound.org/people/MiraclesHappen/sounds/457585/" target="_blank">freesound.org/people/MiraclesHappen/sounds/457585/</a>
                             </p>
                         </div>
                     </article>
@@ -79,6 +102,13 @@
                             upon them and their magic becomes stronger, images of places beyond the world they are in
                             begin to manifest in their mind.
                         </p>
+                        <div class="collapsible-wrapper">
+                            <input id="collapsible-magic-discharge" type="checkbox">
+                            <label for="collapsible-magic-discharge"></label>
+                            <p class="collapsible-content">
+                                <strong>No more information is available</strong>
+                            </p>
+                        </div>
                     </article>
                     <input type="range" min="0" max="0" value="0">
                 </audio-player>
@@ -100,21 +130,21 @@
                             <input id="collapsible-windchimes" type="checkbox">
                             <label for="collapsible-windchimes"></label>
                             <p class="collapsible-content">
-                                Sample Attribution
+                                <strong>Sample Attribution</strong>
                                 <br>
-                                freesound.org/people/WilliamJMeyer/sounds/444930/
+                                <a href="freesound.org/people/WilliamJMeyer/sounds/444930/" target="_blank">freesound.org/people/WilliamJMeyer/sounds/444930/</a>
                                 <br>
-                                freesound.org/people/bdvictor/sounds/240914/
+                                <a href="freesound.org/people/bdvictor/sounds/240914/" target="_blank">freesound.org/people/bdvictor/sounds/240914/</a>
                                 <br>
-                                freesound.org/people/monotraum/sounds/208809/
+                                <a href="freesound.org/people/monotraum/sounds/208809/" target="_blank">freesound.org/people/monotraum/sounds/208809/</a>
                                 <br>
-                                freesound.org/people/fellur/sounds/429724/
+                                <a href="freesound.org/people/fellur/sounds/429724/" target="_blank">freesound.org/people/fellur/sounds/429724/</a>
                                 <br>
-                                freesound.org/people/kyles/sounds/454378/
+                                <a href="freesound.org/people/kyles/sounds/454378/" target="_blank">freesound.org/people/kyles/sounds/454378/</a>
                                 <br>
-                                freesound.org/people/ashjenx/sounds/135387/
+                                <a href="freesound.org/people/ashjenx/sounds/135387/" target="_blank">freesound.org/people/ashjenx/sounds/135387/</a>
                                 <br>
-                                freesound.org/people/felix.blume/sounds/234754/
+                                <a href="freesound.org/people/felix.blume/sounds/234754/" target="_blank">freesound.org/people/felix.blume/sounds/234754/</a>
                             </p>
                         </div>
                     </article>
@@ -130,5 +160,6 @@
 </div>
 
 <script type="module" src="js/script.js"></script>
+
 
 </body></html>

@@ -1,12 +1,9 @@
 const { JSDOM } = require("jsdom");
-const { ExifImage } = require("exif");
-const sharp = require("sharp");
 const path = require("path")
 const showdown = require("showdown");
-const { promises: { readFile, writeFile }, existsSync } = require("fs");
+const { promises: { readFile, writeFile } } = require("fs");
 
 const { findDirBySuffix } = require("../utils/file-search.util")
-const {createElement} = require("jsdom/lib/jsdom/living/helpers/create-element");
 
 async function start() {
     const target = "./articles/index.html";
