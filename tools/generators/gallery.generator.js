@@ -1,10 +1,17 @@
 const { JSDOM } = require("jsdom");
-const { ExifImage } = require("exif");
+const { exiftool } = require("exiftool-vendored");
 const sharp = require("sharp");
 const path = require("path")
 const { promises: { readFile, writeFile }, existsSync } = require("fs");
-
 const { findByType } = require("../utils/file-search.util")
+const readline = require('readline');
+
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+const question = (query) => new Promise(resolve => rl.question(query, resolve));
 
 async function start() {
     const target = "./gallery/index.html";
@@ -25,42 +32,64 @@ async function start() {
     imageGallery.innerHTML = "";
 
     for (const image of images) {
-        const exifData = await new Promise((resolve, reject) => {
-            try {
-                new ExifImage({
-                    image
-                }, (error, data) => {
-                    if (error) {
-                        reject(error);
-                        return;
-                    }
-
-                    resolve(data);
-                });
-            } catch (error) {
-                reject(error)
-            }
-        })
-
+        console.log("")
+        console.log(`Now processing [${image}]`)
         const clonedGalleryFigure = galleryFigure.cloneNode(true);
-        
-        
-        const commentText = exifData && exifData.image && exifData.image.XPComment
-            ? exifData.image.XPComment.filter(x => x > 0).map(x => String.fromCharCode(x)).join("")
-            : "No caption available.";
 
-        
-        const subjectText = exifData && exifData.image && exifData.image.XPSubject
-            ? exifData.image.XPSubject.filter(x => x > 0).map(x => String.fromCharCode(x)).join("")
-            : "No data.";
+        const exifToolData = await exiftool.read(image);
 
-        const tagsText = exifData && exifData.image && exifData.image.XPKeywords
-            ? exifData.image.XPKeywords.filter(x => x > 0).map(x => String.fromCharCode(x)).join("")
-            : "No data.";
+        let titleText = exifToolData?.XPTitle;
+        if (!titleText) {
+            console.log("No title text found on the image EXIF");
+            titleText = await question("Enter title: ")
+            await exiftool.write(image, {
+                XPTitle: titleText,
+            });
+        }
 
-        const artistText = exifData && exifData.image && exifData.image.Artist
-            ? exifData.image.Artist
-            : null;
+        let subjectText = exifToolData?.XPSubject;
+        if (!subjectText) {
+            console.log("No subject text found on the image EXIF");
+            subjectText = await question("Enter a subject: ")
+            await exiftool.write(image, {
+                XPSubject: subjectText,
+            });
+        }
+
+        let commentText = exifToolData?.XPComment
+        if (!commentText) {
+            console.log("No comment text found on the image EXIF");
+            commentText = await question("Enter a comment: ")
+            await exiftool.write(image, {
+                XPComment: commentText,
+            });
+        }
+
+        let artistText = exifToolData?.Artist;
+        if (!artistText) {
+            console.log("No keywords text found on the image EXIF");
+            artistText = await question("Enter artist name: ")
+            await exiftool.write(image, {
+                Artist: artistText,
+            });
+        }
+
+        let tagsText = exifToolData?.XPKeywords;
+        if (!tagsText) {
+            console.log("No keywords text found on the image EXIF");
+            tagsText = await question("Enter space seperated keywords: ")
+            await exiftool.write(image, {
+                XPKeywords: tagsText,
+            });
+        }
+
+        console.log("Data:");
+        console.log("  Title: ", titleText);
+        console.log("  Subject: ", subjectText);
+        console.log("  Comment: ", commentText);
+        console.log("  Artist: ", artistText);
+        console.log("  Keywords: ", tagsText);
+
         let artistData;
         if (artistText) {
             const artistDataSplit = artistText.split(";");
@@ -71,30 +100,28 @@ async function start() {
         }
 
         const img = clonedGalleryFigure.querySelector("img");
-        const thumbPath = await resizeImage(image, "thumb", 500);
-        img.src = thumbPath;
+        img.src = await resizeImage(image, "thumb", 500);
         img.alt = subjectText;
 
         const anchor = clonedGalleryFigure.querySelector("a");
         const linkName = path.basename(image, path.extname(image));
         anchor.href = `/gallery/${linkName}`
-        
 
         imageGallery.appendChild(clonedGalleryFigure);
-
-        const titleText = exifData && exifData.image && exifData.image.XPTitle
-            ? exifData.image.XPTitle.filter(x => x > 0).map(x => String.fromCharCode(x)).join("")
-            : linkName.split("-").map(x => x.charAt(0).toUpperCase() + x.slice(1)).join(" ")
 
         const captionElement = clonedGalleryFigure.querySelector("figcaption");
         captionElement.innerHTML = "";
         captionElement.appendChild(galleryDom.window.document.createTextNode(titleText));
 
         await createImageView(linkName, titleText, commentText, subjectText, artistData, tagsText, image);
+        console.log("")
+        console.log("")
     }
 
     const result = galleryDom.serialize();
     await writeFile(target, result)
+
+    process.exit(0);
 }
 
 async function resizeImage(imagePath, nameDecoration, size) {
@@ -145,8 +172,7 @@ async function createImageView(linkName, title, comment, subject, artist, tags, 
     if (tags.includes("nsfw")) {
         galleryBlurElement.classList.add("active");
         const tagsSplit = tags.split(";");
-        const imageUri = tagsSplit[1];
-        imgElement.src = imageUri;
+        imgElement.src = tagsSplit[1];
     } else {
         imgElement.src = src;
     }

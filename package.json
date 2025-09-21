@@ -11,7 +11,13 @@
     "gallery-gen": "node ./tools/generators/gallery.generator.js",
     "article-gen": "node ./tools/generators/article.generator.js"
   },
-  "keywords": ["stream", "portal", "mira", "synth", "blog"],
+  "keywords": [
+    "stream",
+    "portal",
+    "mira",
+    "synth",
+    "blog"
+  ],
   "author": "MiraSynth",
   "license": "MIT",
   "dependencies": {
@@ -21,11 +27,11 @@
     "three": "^0.180.0"
   },
   "devDependencies": {
-    "exif": "^0.6.0",
     "express": "^5.1.0",
     "http-server": "^14.1.1",
     "jsdom": "^27.0.0",
     "sass": "^1.93.0",
-    "showdown": "^2.1.0"
+    "showdown": "^2.1.0",
+    "exiftool-vendored": "^30.5.0"
   }
 }
