@@ -234,6 +234,24 @@ export class Particle {
         this._materialRef.opacity = opacity;
     }
 
+    /**
+     *
+     * @param h number (0-1)
+     * @param s number (0-1)
+     * @param l number (0-1)
+     */
+    setColor(h, s, l) {
+        this._materialRef.color.setHSL(h, s, l);
+    }
+
+    /**
+     *
+     * @param size number
+     */
+    setSize(size) {
+        this._materialRef.size = size;
+    }
+
     resetPosition() {
         this.setPosition(this._origin);
     }

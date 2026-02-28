@@ -14,7 +14,7 @@ const contexts = [];
  * @typedef {Object} TranslateVectorOptions
  * @property {THREE.Vector3} fromVector
  * @property {THREE.Vector3} toVector
- * @property {THREE.Vector3} outVector
+ * @property {THREE.Vector3} [outVector]
  * @property {number} duration
  */
 
@@ -93,7 +93,7 @@ class TranslateVectorContext {
 
     /**
      *
-     * @returns {Vector3}
+     * @returns {THREE.Vector3}
      */
     getResult() {
         return this._options.outVector;

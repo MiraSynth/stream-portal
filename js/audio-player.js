@@ -13,8 +13,8 @@ class AudioManager {
      *  duration: number
      *  isSeeking: boolean
      *  isPlaying: boolean
-     *  onTimeUpdate: function(number)
-     *  onStateChange: function()
+     *  onTimeUpdate: Set<function(number)>
+     *  onStateChange: Set<function()>
      * }}
      * @private
      */
@@ -58,8 +58,14 @@ class AudioManager {
             });
         }
 
-        this._tracks[src].audio.play();
+        // Some browsers start AudioContext in suspended state until user interaction.
+        if (this._audioContext.state === "suspended") {
+            await this._audioContext.resume();
+        }
+
+        await this._tracks[src].audio.play();
         this._tracks[src].isPlaying = true;
+        this._notifyStateChange(src);
     }
 
     pause(src) {
@@ -67,8 +73,11 @@ class AudioManager {
             return;
         }
 
-        this._tracks[src].audio.pause();
+        if (this._tracks[src].audio) {
+            this._tracks[src].audio.pause();
+        }
         this._tracks[src].isPlaying = false;
+        this._notifyStateChange(src);
     }
 
     /**
@@ -76,27 +85,51 @@ class AudioManager {
      * @param src string
      * @param onTimeUpdate function(number)
      * @param onStateChange function()
+     * @returns {function(): void} unsubscribe
      */
     registerAudio(src, onTimeUpdate, onStateChange) {
-        if (this._tracks[src]) {
-            return;
+        if (!this._tracks[src]) {
+            this._tracks[src] = {
+                duration: 0,
+                isPlaying: false,
+                isSeeking: false,
+                onTimeUpdate: new Set(),
+                onStateChange: new Set(),
+            }
         }
 
-        this._tracks[src] = {
-            duration: 0,
-            isPlaying: false,
-            isSeeking: false,
-            onTimeUpdate,
-            onStateChange
+        const track = this._tracks[src];
+        track.onTimeUpdate.add(onTimeUpdate);
+        track.onStateChange.add(onStateChange);
+
+        // Immediately sync newly-registered UI to current state (important for navigation).
+        if (track.audio) {
+            const d = track.audio.duration;
+            if (Number.isFinite(d) && d > 0) {
+                track.duration = d;
+            }
+            onTimeUpdate(track.audio.currentTime || 0);
+        } else {
+            onTimeUpdate(0);
+        }
+        onStateChange();
+
+        return () => {
+            const t = this._tracks[src];
+            if (!t) return;
+            t.onTimeUpdate.delete(onTimeUpdate);
+            t.onStateChange.delete(onStateChange);
         }
     }
 
     seek(src, value) {
-        if (!this._tracks[src]) {
+        if (!this._tracks[src] || !this._tracks[src].audio) {
             return;
         }
 
         this._tracks[src].audio.currentTime = value;
+        // Ensure any UI that is listening gets an immediate update.
+        this._notifyTimeUpdate(src, value);
     }
 
     isPlaying(src) {
@@ -109,10 +142,25 @@ class AudioManager {
 
     getDuration(src) {
         if (!this._tracks[src]) {
-            return false;
+            return 0;
+        }
+
+        const audio = this._tracks[src].audio;
+        if (audio) {
+            const d = audio.duration;
+            if (Number.isFinite(d) && d > 0) {
+                this._tracks[src].duration = d;
+                return d;
+            }
         }
 
         return this._tracks[src].duration;
+    }
+
+    getCurrentTime(src) {
+        const t = this._tracks[src];
+        if (!t || !t.audio) return 0;
+        return t.audio.currentTime || 0;
     }
 
     setIsSeeking(src, value) {
@@ -121,6 +169,30 @@ class AudioManager {
         }
 
         return this._tracks[src].isSeeking = value;
+    }
+
+    _notifyTimeUpdate(src, time) {
+        const t = this._tracks[src];
+        if (!t) return;
+        for (const cb of t.onTimeUpdate) {
+            try {
+                cb(time);
+            } catch {
+                // ignore
+            }
+        }
+    }
+
+    _notifyStateChange(src) {
+        const t = this._tracks[src];
+        if (!t) return;
+        for (const cb of t.onStateChange) {
+            try {
+                cb();
+            } catch {
+                // ignore
+            }
+        }
     }
 
     _getAudio(src) {
@@ -136,26 +208,41 @@ class AudioManager {
             context.source.connect(this._analyser);
             context.audio = player;
             player.volume = 0.9;
-            player.addEventListener("durationchange", function() {
-                if (this.duration !== Infinity || this.duration !== undefined) {
-                    const duration = this.duration;
-                    resolve(duration);
+
+            const tryResolveDuration = () => {
+                const d = player.duration;
+                if (Number.isFinite(d) && d > 0) {
+                    context.duration = d;
+                    resolve(d);
                 }
-            }, false);
+            };
+
+            player.addEventListener("loadedmetadata", tryResolveDuration, {once: true});
+            player.addEventListener("durationchange", tryResolveDuration, false);
+
             player.addEventListener("timeupdate", () => {
                 if (context.isSeeking) {
                     return;
                 }
-                context.onTimeUpdate(player.currentTime);
+                this._notifyTimeUpdate(src, player.currentTime);
+            });
+            player.addEventListener("seeked", () => {
+                this._notifyTimeUpdate(src, player.currentTime);
             });
             player.addEventListener("play", () => {
                 context.isPlaying = true;
-                context.onStateChange()
+                this._notifyStateChange(src);
             });
             player.addEventListener("pause", () => {
                 context.isPlaying = false;
-                context.onStateChange()
+                this._notifyStateChange(src);
             });
+            player.addEventListener("ended", () => {
+                context.isPlaying = false;
+                this._notifyStateChange(src);
+                this._notifyTimeUpdate(src, player.currentTime);
+            });
+
             player.load();
         });
     }
@@ -166,21 +253,30 @@ class AudioManager {
         this._analyser.maxDecibels = -10;
         this._analyser.smoothingTimeConstant = 0.85;
 
-        this._analyser.fftSize = 2048;
-        const bufferLength = this._analyser .frequencyBinCount;
+        this._analyser.fftSize = 256;
+        const bufferLength = this._analyser.frequencyBinCount;
 
         this._analyser.connect(this._audioContext.destination);
 
         const getFFT = () => requestAnimationFrame(async () => {
             const dataArray = new Uint8Array(bufferLength);
-            this._analyser.getByteTimeDomainData(dataArray);
+            this._analyser.getByteFrequencyData(dataArray);
 
-            const total = dataArray.reduce((acc, curr) => acc + curr);
+            const total = dataArray.reduce((acc, curr) => acc + curr, 0);
             const average = total / bufferLength;
 
-            const result = average - 128;
+            const bassFreq = dataArray.slice(0, Math.floor(bufferLength * 0.1)).reduce((a, b) => a + b, 0) / Math.floor(bufferLength * 0.1);
+            const midFreq = dataArray.slice(Math.floor(bufferLength * 0.1), Math.floor(bufferLength * 0.5)).reduce((a, b) => a + b, 0) / (bufferLength * 0.4);
+            const trebleFreq = dataArray.slice(Math.floor(bufferLength * 0.5)).reduce((a, b) => a + b, 0) / (bufferLength * 0.5);
+
             const event = new CustomEvent("audio-player", {
-                detail: result
+                detail: {
+                    loudness: average,
+                    bass: bassFreq,
+                    mid: midFreq,
+                    treble: trebleFreq,
+                    spectrum: dataArray
+                }
             });
             document.dispatchEvent(event);
 
@@ -205,6 +301,7 @@ class AudioPlayer extends HTMLElement {
     _playPauseButton;
 
     _source = undefined
+    _unsubscribe = undefined
 
     constructor() {
         super();
@@ -221,12 +318,33 @@ class AudioPlayer extends HTMLElement {
             return;
         }
 
-        AUDIO_MANAGER.registerAudio(this._source, (newTime) => {
-            this._progress.value = newTime;
+        this._progress.min = "0";
+        if (!this._progress.step) {
+            this._progress.step = "0.01";
+        }
+
+        const syncMax = () => {
+            const duration = AUDIO_MANAGER.getDuration(this._source);
+            if (duration && Number.isFinite(duration) && duration > 0) {
+                this._progress.max = String(duration);
+            }
+        }
+
+        this._unsubscribe = AUDIO_MANAGER.registerAudio(this._source, (newTime) => {
+            // Ensure max is always correct (important if metadata arrives late)
+            syncMax();
+
+            this._progress.value = String(newTime);
         }, () => {
             this._updatePlayPauseButton();
+            syncMax();
+
+            const t = AUDIO_MANAGER.getCurrentTime(this._source);
+            this._progress.value = String(t);
         });
 
+        syncMax();
+        this._progress.value = String(AUDIO_MANAGER.getCurrentTime(this._source));
         this._updatePlayPauseButton();
 
         this._playPauseButton.addEventListener("click", async e => {
@@ -236,26 +354,40 @@ class AudioPlayer extends HTMLElement {
                 AUDIO_MANAGER.pause(this._source);
             } else {
                 await AUDIO_MANAGER.play(this._source);
-                this._progress.max = AUDIO_MANAGER.getDuration(this._source);
+                syncMax();
+                this._progress.value = String(AUDIO_MANAGER.getCurrentTime(this._source));
             }
 
             this._updatePlayPauseButton();
         });
 
-        this._progress.addEventListener("change", () => {
-            const value = this._progress.value;
-            AUDIO_MANAGER.seek(this._source, value);
+        this._progress.addEventListener("input", () => {
+            AUDIO_MANAGER.setIsSeeking(this._source, true);
+            AUDIO_MANAGER.seek(this._source, Number(this._progress.value));
         })
 
-        this._progress.addEventListener("mousedown", () => {
-            const value = this._progress.value;
+        this._progress.addEventListener("change", () => {
+            AUDIO_MANAGER.setIsSeeking(this._source, false);
+        });
+
+        this._progress.addEventListener("pointerdown", () => {
             AUDIO_MANAGER.setIsSeeking(this._source, true);
         });
 
-        this._progress.addEventListener("mouseup", () => {
-            const value = this._progress.value;
+        this._progress.addEventListener("pointerup", () => {
             AUDIO_MANAGER.setIsSeeking(this._source, false);
         });
+
+        this._progress.addEventListener("pointercancel", () => {
+            AUDIO_MANAGER.setIsSeeking(this._source, false);
+        });
+    }
+
+    disconnectedCallback() {
+        if (this._unsubscribe) {
+            this._unsubscribe();
+            this._unsubscribe = undefined;
+        }
     }
 
     _updatePlayPauseButton() {
@@ -271,3 +403,4 @@ class AudioPlayer extends HTMLElement {
 export function LoadAudioPlayer() {
     customElements.define("audio-player", AudioPlayer);
 }
+

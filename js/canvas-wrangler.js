@@ -31,16 +31,33 @@ export function LoadCanvasWrangler() {
 
     /* particles - start */
     const floatingBokehParticles = new FloatingBokeh(scene, camera, textureLoader, 200);
-    const shootingBokehParticles = new ShootingBokeh(scene, camera, textureLoader, 100);
+    const shootingBokehParticles = new ShootingBokeh(scene, camera, textureLoader, 200);
+
+    let audioLoudness = 0;
+    let targetLoudness = 0;
+    let audioData = {
+        loudness: 0,
+        bass: 0,
+        mid: 0,
+        treble: 0
+    };
+    let lastReleaseTime = 0;
+    let lastAudioActivityTime = 0;
+    const releaseDebounce = 150;
+    const audioActivityTimeout = 1000;
+    const smoothingFactor = 0.1;
 
     document.addEventListener("audio-player", e => {
-        if (e.detail < 7) {
-            return;
+        if (typeof e.detail === 'object') {
+            audioData.loudness = e.detail.loudness || 0;
+            audioData.bass = e.detail.bass || 0;
+            audioData.mid = e.detail.mid || 0;
+            audioData.treble = e.detail.treble || 0;
+            audioData.spectrum = e.detail.spectrum || [];
+            targetLoudness = Math.max(0, audioData.loudness);
+            lastAudioActivityTime = Date.now();
         }
-
-        shootingBokehParticles.releaseBokeh(1);
     });
-    /* particles - end */
 
     document.addEventListener("console-commander", e => {
         const commandArgs = e.detail;
@@ -59,7 +76,7 @@ export function LoadCanvasWrangler() {
             return;
         }
 
-        shootingBokehParticles.releaseBokeh(count);
+        shootingBokehParticles.releaseBokeh(count, audioData);
     });
 
     let delta = 0;
@@ -68,10 +85,21 @@ export function LoadCanvasWrangler() {
         const timeStart = Date.now();
         requestAnimationFrame(animate);
 
+        const now = Date.now();
+        const isAudioActive = audioLoudness > 2 && (now - lastAudioActivityTime) < audioActivityTimeout;
+
+        audioLoudness += (targetLoudness - audioLoudness) * smoothingFactor;
+
+        if (isAudioActive && audioLoudness > 2 && (now - lastReleaseTime) >= releaseDebounce) {
+            const particleCount = Math.max(1, Math.floor(audioLoudness / 25));
+            shootingBokehParticles.releaseBokeh(particleCount, audioData);
+            lastReleaseTime = now;
+        }
+
         process(timeStart, delta);
 
         floatingBokehParticles.process(delta);
-        shootingBokehParticles.process(delta);
+        shootingBokehParticles.process(delta, audioData, isAudioActive);
 
         renderer.render(scene, camera);
 
@@ -79,4 +107,5 @@ export function LoadCanvasWrangler() {
     }
 
     animate().then(r => console.log(r));
+    /* particles - end */
 }

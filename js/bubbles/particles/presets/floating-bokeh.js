@@ -1,6 +1,7 @@
 import * as THREE from "../../../vendor/three.module.js";
 import {TexturedParticleContainer} from "../particles.js";
 import {TRANSLATE_VECTOR_CONTEXT_STATE_STOPPED, translateVector} from "../../animations/translate.js";
+import {createParticleMaterialGroups} from "../particle-utils.js";
 
 export class FloatingBokeh {
 
@@ -51,27 +52,7 @@ export class FloatingBokeh {
     }
 
     _setup() {
-        const particleSprites = [
-            this._textureLoader.load("assets/textures/sprites/orb2.png"),
-            this._textureLoader.load("assets/textures/sprites/orb3.png"),
-            this._textureLoader.load("assets/textures/sprites/orb4.png")
-        ];
-        let particleMaterialGroups = [];
-        for (let i  = 0; i < this._particleCount; i++) {
-            particleMaterialGroups[i] = {
-                size: 100,
-                texture: particleSprites[Math.floor(Math.random() * particleSprites.length)],
-                color: {
-                    h: Math.random(),
-                    s: 0.5,
-                    l: 0.5
-                },
-                range: {
-                    start: i,
-                    stride: 1
-                }
-            }
-        }
+        const particleMaterialGroups = createParticleMaterialGroups(this._textureLoader, this._particleCount);
 
         this._particleContainer = new TexturedParticleContainer(
             this._scene,
